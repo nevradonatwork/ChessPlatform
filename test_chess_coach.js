@@ -210,6 +210,17 @@ async function runTests() {
       errors.push(`Hint test error: ${e.message}`);
     }
 
+    // ── TEST 4: Study file loader ─────────────────────────────────────
+    try {
+      const r = await testStudyLoader(page);
+      passed += r.passed; failed += r.failed;
+      r.errors.forEach(e => errors.push(e));
+    } catch (e) {
+      console.log(`  FAIL: Study test threw: ${e.message}`);
+      failed++;
+      errors.push(`Study test error: ${e.message}`);
+    }
+
   } catch (e) {
     console.log(`\nFATAL ERROR: ${e.message}`);
     failed++;
@@ -240,3 +251,41 @@ runTests().then(ok => {
   console.error('Test runner error:', e);
   process.exit(1);
 });
+
+// ─── TEST 4: Study file loader ─────────────────────────────────────────────
+async function testStudyLoader(page) {
+  console.log('\n[TEST 4] Study file loader');
+  let p = 0, f = 0; const errs = [];
+  function chk(name, ok, detail = '') {
+    if (ok) { console.log(`  PASS: ${name}`); p++; }
+    else     { console.log(`  FAIL: ${name}${detail ? ' — ' + detail : ''}`); f++; errs.push(name); }
+  }
+
+  const fs = require('fs');
+  const STUDY_PGN = '[Event "Ch1 Opening"]\n[Result "*"]\n\n1. e4 e5 *\n\n[Event "Ch2 Endgame"]\n[SetUp "1"]\n[FEN "8/6p1/7p/4P3/1kP5/p2K2PP/8/8 w - - 0 41"]\n[Result "*"]\n\n1. Kc2 *\n\n[Event "Ch3 Tactics"]\n[Result "*"]\n\n1. d4 d5 *';
+  fs.writeFileSync('/tmp/test_study.pgn', STUDY_PGN);
+
+  await page.setInputFiles('#study-file-input', '/tmp/test_study.pgn');
+  await page.waitForTimeout(700);
+
+  const count = await page.$$eval('.chapter-item', els => els.length);
+  chk('3 chapters loaded', count === 3, `got ${count}`);
+
+  const panelVisible = await page.$eval('#study-panel', el => el.style.display !== 'none');
+  chk('Study panel visible', panelVisible);
+
+  const a1 = await page.$eval('.chapter-item.active .chapter-num', el => el.textContent).catch(() => 'NONE');
+  chk('Chapter 1 active after load', a1 === '1', `got "${a1}"`);
+
+  const items = await page.$$('.chapter-item');
+  await items[1].click();
+  await page.waitForTimeout(400);
+
+  const fen = await page.$eval('#fen-display', el => el.textContent);
+  chk('Ch2 loads endgame FEN', fen.includes('1kP5'), fen.slice(0, 35));
+
+  const a2 = await page.$eval('.chapter-item.active .chapter-num', el => el.textContent).catch(() => 'NONE');
+  chk('Chapter 2 active after click', a2 === '2', `got "${a2}"`);
+
+  return { passed: p, failed: f, errors: errs };
+}
