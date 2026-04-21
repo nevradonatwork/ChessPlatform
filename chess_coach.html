@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Coach</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0f;
+      --surface: #1a1a1c;
+      --surface2: #242426;
+      --border: #2e2e32;
+      --accent: #e8c96d;
+      --accent2: #5b9bd5;
+      --text: #e8e8e8;
+      --muted: #888888;
+      --green: #4caf6b;
+      --red: #e05555;
+      --radius: 6px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .app-wrapper {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      align-items: flex-start;
+    }
+
+    /* ---- LEFT COLUMN ---- */
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 480px;
+      flex-shrink: 0;
+    }
+
+    .board-container {
+      position: relative;
+      width: 480px;
+      height: 480px;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    #board-canvas {
+      display: block;
+    }
+
+    #arrow-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .controls-bar button {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.15s;
+    }
+
+    .controls-bar button:hover {
+      background: var(--border);
+    }
+
+    .controls-bar button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .move-counter {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .engine-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #engine-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    #engine-dot.loading   { background: var(--muted); }
+    #engine-dot.ready     { background: var(--green); }
+    #engine-dot.analysing { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+    #engine-dot.complete  { background: var(--green); }
+    #engine-dot.error     { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    #engine-status-label {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Eval bar */
+    .eval-bar-container {
+      position: relative;
+      height: 22px;
+      width: 100%;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    /* Blue (black advantage) is the right portion; gold (white advantage) fills from left */
+    .eval-bar-black {
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 50%;
+      background: var(--accent2);
+      transition: width 0.35s ease;
+    }
+
+    #eval-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 50%;
+      background: var(--accent);
+      transition: width 0.35s ease;
+    }
+
+    #eval-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #111;
+      pointer-events: none;
+      white-space: nowrap;
+      text-shadow: 0 0 3px rgba(255,255,255,0.4);
+    }
+
+    /* Move list */
+    #move-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      align-items: center;
+      min-height: 28px;
+    }
+
+    .move-number-label {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 3px 2px;
+      align-self: center;
+      font-family: 'IBM Plex Mono', monospace;
+      user-select: none;
+    }
+
+    .move-chip {
+      padding: 3px 9px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      user-select: none;
+      transition: border-color 0.1s, background 0.1s;
+    }
+
+    .move-chip.white-move {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .move-chip.black-move {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .move-chip:hover {
+      background: var(--border);
+    }
+
+    .move-chip.active {
+      border-color: var(--accent);
+    }
+
+    /* FEN display */
+    #fen-display {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    /* PGN section */
+    .pgn-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pgn-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    #pgn-input {
+      width: 100%;
+      height: 80px;
+      resize: vertical;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      border-radius: var(--radius);
+      padding: 7px 8px;
+      transition: border-color 0.15s;
+    }
+
+    #pgn-input:focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+
+    #btn-load-pgn {
+      align-self: flex-end;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    #btn-load-pgn:hover {
+      background: var(--border);
+    }
+
+    /* ---- RIGHT COLUMN ---- */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      min-width: 280px;
+      max-width: 440px;
+    }
+
+    .engine-panel, .coach-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel-header {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    #best-move-display {
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 18px;
+    }
+
+    #best-move-display .bm-label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    #best-move-display .bm-value {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .api-key-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .api-key-row label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    #api-key-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      transition: border-color 0.15s;
+    }
+
+    #api-key-input:focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+
+    #btn-analyse {
+      background: var(--accent2);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: opacity 0.15s;
+      align-self: flex-start;
+    }
+
+    #btn-analyse:hover {
+      opacity: 0.85;
+    }
+
+    #btn-analyse:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #coach-response {
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      color: var(--text);
+      min-height: 40px;
+    }
+
+    #coach-response.error {
+      color: var(--red);
+    }
+
+    #coach-response.thinking {
+      color: var(--muted);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+
+    <div class="board-container">
+      <canvas id="board-canvas" width="480" height="480"></canvas>
+      <canvas id="arrow-canvas" width="480" height="480"></canvas>
+    </div>
+
+    <div class="controls-bar">
+      <button id="btn-start" title="Start">⏮</button>
+      <button id="btn-prev"  title="Previous">◀</button>
+      <button id="btn-next"  title="Next">▶</button>
+      <button id="btn-end"   title="End">⏭</button>
+      <span class="move-counter" id="move-counter">0 / 0</span>
+      <div class="engine-status">
+        <span id="engine-dot" class="loading"></span>
+        <span id="engine-status-label">Loading engine...</span>
+      </div>
+    </div>
+
+    <div class="eval-bar-container">
+      <div class="eval-bar-black"></div>
+      <div id="eval-fill"></div>
+      <span id="eval-label">0.0</span>
+    </div>
+
+    <div id="move-list"></div>
+
+    <div id="fen-display"></div>
+
+    <div class="pgn-section">
+      <span class="pgn-label">Paste PGN</span>
+      <textarea id="pgn-input" placeholder="[Event &quot;Test Game&quot;]&#10;[White &quot;Player1&quot;]&#10;[Black &quot;Player2&quot;]&#10;&#10;1. e4 e5 2. Nf3 ..."></textarea>
+      <button id="btn-load-pgn">Load Game</button>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+
+    <div class="engine-panel">
+      <div class="panel-header">Engine Analysis</div>
+      <div id="best-move-display"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
+    </div>
+
+    <div class="coach-panel">
+      <div class="panel-header">Claude Coach</div>
+      <div class="api-key-row">
+        <label for="api-key-input">Anthropic API Key</label>
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-...">
+      </div>
+      <button id="btn-analyse" disabled>Analyse this position ↗</button>
+      <div id="coach-response"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const LIGHT_SQ        = '#f0d9b5';
+const DARK_SQ         = '#b58863';
+const HIGHLIGHT_LIGHT = '#cdd16e';
+const HIGHLIGHT_DARK  = '#aaa23a';
+const SQ              = 60; // logical pixels per square
+const FILES           = 'abcdefgh';
+
+const GLYPHS = {
+  wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
+  bK:'♚', bQ:'♛', bR:'♜', bB:'♝', bN:'♞', bP:'♟'
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let allFens          = [];
+let allMoves         = [];
+let currentIdx       = 0;
+let sfWorker         = null;
+let sfReady          = false;
+let currentEvalScore = null;  // number (pawns, white-relative) or null
+let currentBestMove  = '';    // UCI string
+
+// ─── Canvas setup ─────────────────────────────────────────────────────────────
+
+const boardCanvas = document.getElementById('board-canvas');
+const arrowCanvas = document.getElementById('arrow-canvas');
+const bCtx        = boardCanvas.getContext('2d');
+const aCtx        = arrowCanvas.getContext('2d');
+
+(function initCanvases() {
+  const dpr = window.devicePixelRatio || 1;
+  [boardCanvas, arrowCanvas].forEach(c => {
+    c.width        = 480 * dpr;
+    c.height       = 480 * dpr;
+    c.style.width  = '480px';
+    c.style.height = '480px';
+  });
+  bCtx.scale(dpr, dpr);
+  aCtx.scale(dpr, dpr);
+})();
+
+// ─── Coordinate helpers ───────────────────────────────────────────────────────
+
+function sqToColRow(sq) {
+  return { col: FILES.indexOf(sq[0]), row: 8 - parseInt(sq[1]) };
+}
+
+function sqToCenter(sq) {
+  const { col, row } = sqToColRow(sq);
+  return { x: col * SQ + SQ / 2, y: row * SQ + SQ / 2 };
+}
+
+// ─── Board rendering ──────────────────────────────────────────────────────────
+
+function renderBoard(fen, lastFrom, lastTo) {
+  const chess = new Chess(fen);
+  const board = chess.board(); // [0][0] = a8
+
+  bCtx.clearRect(0, 0, 480, 480);
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const sqName   = FILES[col] + (8 - row);
+      const isLight  = (row + col) % 2 === 0;
+      let   color    = isLight ? LIGHT_SQ : DARK_SQ;
+
+      if (sqName === lastFrom || sqName === lastTo) {
+        color = isLight ? HIGHLIGHT_LIGHT : HIGHLIGHT_DARK;
+      }
+
+      bCtx.fillStyle = color;
+      bCtx.fillRect(col * SQ, row * SQ, SQ, SQ);
+
+      const piece = board[row][col];
+      if (piece) {
+        const key   = piece.color + piece.type.toUpperCase();
+        const glyph = GLYPHS[key];
+        if (glyph) {
+          bCtx.font         = `${SQ * 0.82}px 'Segoe UI Symbol', 'Apple Color Emoji', serif`;
+          bCtx.textAlign    = 'center';
+          bCtx.textBaseline = 'middle';
+
+          // Shadow for contrast on any square colour
+          bCtx.shadowColor  = 'rgba(0,0,0,0.55)';
+          bCtx.shadowBlur   = 3;
+          bCtx.fillStyle    = piece.color === 'w' ? '#fff' : '#1a1a1a';
+          bCtx.fillText(glyph, col * SQ + SQ / 2, row * SQ + SQ / 2 + 1);
+          bCtx.shadowBlur   = 0;
+        }
+      }
+    }
+  }
+}
+
+// ─── Arrow drawing ────────────────────────────────────────────────────────────
+
+function clearArrow() {
+  aCtx.clearRect(0, 0, 480, 480);
+}
+
+function renderArrow(fromSq, toSq) {
+  clearArrow();
+  if (!fromSq || !toSq || fromSq === toSq) return;
+
+  const from = sqToCenter(fromSq);
+  const to   = sqToCenter(toSq);
+
+  const dx  = to.x - from.x;
+  const dy  = to.y - from.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const ux  = dx / len;
+  const uy  = dy / len;
+
+  const startX = from.x + ux * SQ * 0.2;
+  const startY = from.y + uy * SQ * 0.2;
+  const endX   = to.x   - ux * SQ * 0.25;
+  const endY   = to.y   - uy * SQ * 0.25;
+
+  aCtx.strokeStyle = 'rgba(150,150,150,0.75)';
+  aCtx.fillStyle   = 'rgba(150,150,150,0.75)';
+  aCtx.lineWidth   = SQ * 0.15;
+  aCtx.lineCap     = 'round';
+
+  aCtx.beginPath();
+  aCtx.moveTo(startX, startY);
+  aCtx.lineTo(endX, endY);
+  aCtx.stroke();
+
+  // Arrowhead
+  const angle   = Math.atan2(dy, dx);
+  const headLen = SQ * 0.35;
+  const tipX    = to.x - ux * SQ * 0.1;
+  const tipY    = to.y - uy * SQ * 0.1;
+
+  aCtx.beginPath();
+  aCtx.moveTo(tipX, tipY);
+  aCtx.lineTo(tipX - headLen * Math.cos(angle - Math.PI / 6),
+              tipY - headLen * Math.sin(angle - Math.PI / 6));
+  aCtx.lineTo(tipX - headLen * Math.cos(angle + Math.PI / 6),
+              tipY - headLen * Math.sin(angle + Math.PI / 6));
+  aCtx.closePath();
+  aCtx.fill();
+}
+
+// ─── FEN display ─────────────────────────────────────────────────────────────
+
+function updateFenDisplay() {
+  document.getElementById('fen-display').textContent = allFens[currentIdx] || '';
+}
+
+// ─── Move counter ─────────────────────────────────────────────────────────────
+
+function updateMoveCounter() {
+  document.getElementById('move-counter').textContent =
+    `${currentIdx} / ${allMoves.length}`;
+}
+
+// ─── renderPosition ───────────────────────────────────────────────────────────
+
+function renderPosition() {
+  const lastMove = currentIdx > 0 ? allMoves[currentIdx - 1] : null;
+  renderBoard(allFens[currentIdx], lastMove ? lastMove.from : null, lastMove ? lastMove.to : null);
+  renderArrow(lastMove ? lastMove.from : null, lastMove ? lastMove.to : null);
+  updateFenDisplay();
+  updateMoveCounter();
+  updateMoveListHighlight();
+}
+
+// ─── Move list ────────────────────────────────────────────────────────────────
+
+function buildMoveList() {
+  const container = document.getElementById('move-list');
+  container.innerHTML = '';
+
+  allMoves.forEach((mv, i) => {
+    if (i % 2 === 0) {
+      const num = document.createElement('span');
+      num.className = 'move-number-label';
+      num.textContent = (i / 2 + 1) + '.';
+      container.appendChild(num);
+    }
+
+    const chip = document.createElement('span');
+    chip.className   = 'move-chip ' + (i % 2 === 0 ? 'white-move' : 'black-move');
+    chip.textContent = mv.san;
+    chip.dataset.idx = i + 1; // position index after this move
+    chip.addEventListener('click', () => navigateTo(parseInt(chip.dataset.idx)));
+    container.appendChild(chip);
+  });
+}
+
+function updateMoveListHighlight() {
+  document.querySelectorAll('.move-chip').forEach(chip => {
+    chip.classList.toggle('active', parseInt(chip.dataset.idx) === currentIdx);
+  });
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+function navigateTo(idx) {
+  if (allFens.length === 0) return;
+  currentIdx = Math.max(0, Math.min(allFens.length - 1, idx));
+  renderPosition();
+  clearCoachPanel();
+  analysePosition();
+}
+
+// ─── PGN loading ──────────────────────────────────────────────────────────────
+
+function loadPgn() {
+  const pgnText = document.getElementById('pgn-input').value.trim();
+  if (!pgnText) { alert('Please paste a PGN first.'); return; }
+
+  let tempChess;
+  try {
+    tempChess = new Chess();
+    const ok  = tempChess.load_pgn(pgnText);
+    if (!ok) { alert('Invalid PGN. Please check and try again.'); return; }
+  } catch (e) {
+    alert('Invalid PGN: ' + e.message);
+    return;
+  }
+
+  allMoves = tempChess.history({ verbose: true });
+
+  const walker = new Chess();
+  allFens = [walker.fen()];
+  for (const mv of allMoves) {
+    walker.move(mv.san);
+    allFens.push(walker.fen());
+  }
+
+  currentIdx = 0;
+  buildMoveList();
+  renderPosition();
+  clearCoachPanel();
+  document.getElementById('btn-analyse').disabled = false;
+  analysePosition();
+}
+
+// ─── Coach panel ─────────────────────────────────────────────────────────────
+
+function clearCoachPanel() {
+  const el = document.getElementById('coach-response');
+  el.textContent = '';
+  el.className   = '';
+}
+
+function showCoachText(text) {
+  const el = document.getElementById('coach-response');
+  el.textContent = text;
+  el.className   = '';
+}
+
+function showCoachError(msg) {
+  const el = document.getElementById('coach-response');
+  el.textContent = msg;
+  el.className   = 'error';
+}
+
+function showCoachThinking() {
+  const el = document.getElementById('coach-response');
+  el.textContent = 'Analysing position…';
+  el.className   = 'thinking';
+}
+
+// ─── Engine status dot ───────────────────────────────────────────────────────
+
+const ENGINE_LABELS = {
+  loading:   'Loading engine...',
+  ready:     'Engine ready',
+  analysing: 'Analysing...',
+  complete:  'Analysis complete',
+  error:     'Engine unavailable'
+};
+
+function engineDot(state) {
+  const dot   = document.getElementById('engine-dot');
+  const label = document.getElementById('engine-status-label');
+  dot.className = state;
+  label.textContent = ENGINE_LABELS[state] || '';
+}
+
+// ─── Eval bar ─────────────────────────────────────────────────────────────────
+
+function evalToPercent(score) {
+  // score in pawns, white-relative; clamp to ±10
+  return 50 + Math.max(-10, Math.min(10, score)) * 5;
+}
+
+function updateEvalBar(scoreWhiteRelative, labelOverride) {
+  const pct   = evalToPercent(scoreWhiteRelative);
+  const fill  = document.getElementById('eval-fill');
+  const lbl   = document.getElementById('eval-label');
+  const black = document.querySelector('.eval-bar-black');
+
+  fill.style.width  = pct + '%';
+  black.style.width = (100 - pct) + '%';
+
+  if (labelOverride) {
+    lbl.textContent = labelOverride;
+  } else {
+    const s = scoreWhiteRelative;
+    lbl.textContent = (s > 0 ? '+' : '') + s.toFixed(1);
+  }
+
+  currentEvalScore = labelOverride || scoreWhiteRelative;
+}
+
+function resetEvalBar() {
+  document.getElementById('eval-fill').style.width        = '50%';
+  document.querySelector('.eval-bar-black').style.width   = '50%';
+  document.getElementById('eval-label').textContent       = '0.0';
+}
+
+// ─── UCI → SAN helper ────────────────────────────────────────────────────────
+
+function uciToSan(uci, fen) {
+  try {
+    const c   = new Chess(fen);
+    const res = c.move({ from: uci.slice(0,2), to: uci.slice(2,4), promotion: uci[4] || undefined });
+    return res ? res.san : uci;
+  } catch (_) { return uci; }
+}
+
+// ─── Stockfish ────────────────────────────────────────────────────────────────
+
+function initStockfish() {
+  engineDot('loading');
+  try {
+    const blob = new Blob(
+      [`importScripts('https://unpkg.com/stockfish@10.0/stockfish.js');`],
+      { type: 'application/javascript' }
+    );
+    sfWorker = new Worker(URL.createObjectURL(blob));
+    sfWorker.onmessage = e => handleSfMessage(e.data);
+    sfWorker.onerror   = () => engineDot('error');
+    sfWorker.postMessage('uci');
+  } catch (_) {
+    engineDot('error');
+  }
+}
+
+function handleSfMessage(line) {
+  if (typeof line !== 'string') return;
+
+  if (line.includes('uciok')) {
+    sfWorker.postMessage('isready');
+    return;
+  }
+
+  if (line.includes('readyok')) {
+    sfReady = true;
+    engineDot('ready');
+    analysePosition();
+    return;
+  }
+
+  if (line.startsWith('info') && line.includes('score')) {
+    // Determine side to move from current FEN
+    const fen      = allFens[currentIdx] || '';
+    const isBlack  = fen.split(' ')[1] === 'b';
+
+    const cpMatch  = line.match(/score cp (-?\d+)/);
+    const mateMatch = line.match(/score mate (-?\d+)/);
+
+    if (cpMatch) {
+      // Stockfish score is relative to side-to-move; normalise to white's POV
+      let score = parseInt(cpMatch[1]) / 100;
+      if (isBlack) score = -score;
+      updateEvalBar(score);
+    }
+
+    if (mateMatch) {
+      let n = parseInt(mateMatch[1]);
+      // Positive = side-to-move mates; normalise to white's POV
+      if (isBlack) n = -n;
+      const label = n > 0 ? 'M' + n : '-M' + Math.abs(n);
+      updateEvalBar(n > 0 ? 99 : -99, label);
+    }
+  }
+
+  if (line.startsWith('bestmove')) {
+    const parts = line.split(' ');
+    const bm    = parts[1];
+
+    if (!bm || bm === '(none)') {
+      document.getElementById('bm-value').textContent = 'Game over';
+      engineDot('complete');
+      return;
+    }
+
+    currentBestMove = bm;
+    const san = uciToSan(bm, allFens[currentIdx]);
+    document.getElementById('bm-value').textContent = san;
+    engineDot('complete');
+  }
+}
+
+function analysePosition() {
+  if (!sfReady || allFens.length === 0) return;
+
+  engineDot('analysing');
+  currentEvalScore = null;
+  currentBestMove  = '';
+  document.getElementById('bm-value').textContent = '—';
+  resetEvalBar();
+
+  sfWorker.postMessage('stop');
+  sfWorker.postMessage('position fen ' + allFens[currentIdx]);
+  sfWorker.postMessage('go movetime 1500');
+}
+
+// ─── Claude API ───────────────────────────────────────────────────────────────
+
+async function analyseWithClaude() {
+  const apiKey = document.getElementById('api-key-input').value.trim();
+  if (!apiKey) {
+    showCoachError('Please enter your Anthropic API key.');
+    return;
+  }
+
+  if (allFens.length === 0) {
+    showCoachError('Load a game first.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-analyse');
+  btn.disabled = true;
+  showCoachThinking();
+
+  const fen       = allFens[currentIdx];
+  const moveObj   = currentIdx > 0 ? allMoves[currentIdx - 1] : null;
+  const moveName  = moveObj ? moveObj.san : null;
+  const moveNum   = moveObj ? Math.ceil(currentIdx / 2) : 0;
+  const turnColor = moveObj ? (currentIdx % 2 === 1 ? 'White' : 'Black') : 'White';
+
+  const evalStr = typeof currentEvalScore === 'number'
+    ? (currentEvalScore > 0 ? '+' : '') + currentEvalScore.toFixed(1) + ' (white advantage)'
+    : typeof currentEvalScore === 'string'
+      ? currentEvalScore
+      : 'not available';
+
+  const prompt = `You are a chess coach giving feedback to an intermediate player.
+
+Position FEN: ${fen}
+Move just played: ${moveName ? moveName + ' (move ' + moveNum + ', ' + turnColor + ')' : 'Starting position'}
+Stockfish engine evaluation: ${evalStr}
+Stockfish best move in this position: ${currentBestMove ? uciToSan(currentBestMove, fen) : 'not available'}
+
+Give a short, clear coaching comment — 3 to 5 sentences maximum. Cover:
+1. What the last move achieved strategically or tactically
+2. Whether it was a good move, inaccuracy, or mistake — use the engine evaluation to judge
+3. What the engine's best move suggests about the right plan
+4. One concrete tip for the player
+
+Be direct and practical. No filler phrases.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      showCoachError('API error: ' + data.error.message);
+      return;
+    }
+
+    if (!data.content || !data.content[0]) {
+      showCoachError('Unexpected API response format.');
+      return;
+    }
+
+    showCoachText(data.content[0].text);
+
+  } catch (err) {
+    showCoachError('Network error. Check your API key and connection.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Initialise ───────────────────────────────────────────────────────────────
+
+function resetToStart() {
+  const starter = new Chess();
+  allFens  = [starter.fen()];
+  allMoves = [];
+  currentIdx = 0;
+}
+
+function init() {
+  resetToStart();
+  renderPosition();
+  initStockfish();
+
+  // Button event listeners
+  document.getElementById('btn-start').addEventListener('click', () => navigateTo(0));
+  document.getElementById('btn-prev').addEventListener('click',  () => navigateTo(currentIdx - 1));
+  document.getElementById('btn-next').addEventListener('click',  () => navigateTo(currentIdx + 1));
+  document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
+  document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
+  document.getElementById('btn-analyse').addEventListener('click', analyseWithClaude);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+    if (e.key === 'ArrowLeft')  navigateTo(currentIdx - 1);
+    if (e.key === 'ArrowRight') navigateTo(currentIdx + 1);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
