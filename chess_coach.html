@@ -992,7 +992,29 @@ function uciToSan(uci, fen) {
 async function initStockfish() {
   engineDot('loading');
   try {
-    sfWorker = new Worker('stockfish.js');
+    const [jsResp, wasmResp] = await Promise.all([
+      fetch('./stockfish.js'),
+      fetch('./stockfish.wasm')
+    ]);
+    if (!jsResp.ok || !wasmResp.ok) throw new Error('fetch failed');
+
+    const jsText  = await jsResp.text();
+    const wasmBuf = await wasmResp.arrayBuffer();
+
+    // Chunk-encode WASM to base64 (avoid spread stack-overflow on large arrays)
+    const bytes = new Uint8Array(wasmBuf);
+    let binary  = '';
+    for (let i = 0; i < bytes.length; i += 8192) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    }
+    const wasmDataUrl = 'data:application/wasm;base64,' + btoa(binary);
+
+    // Prepend Module.locateFile override so the blob worker finds the WASM
+    const patched = 'var Module={locateFile:function(){return ' +
+                    JSON.stringify(wasmDataUrl) + ';}};\n' + jsText;
+
+    const blob = new Blob([patched], { type: 'application/javascript' });
+    sfWorker   = new Worker(URL.createObjectURL(blob));
     sfWorker.onmessage = e => handleSfMessage(e.data);
     sfWorker.onerror   = () => engineDot('error');
     sfWorker.postMessage('uci');
