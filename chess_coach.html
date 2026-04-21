@@ -56,6 +56,7 @@
 
     #board-canvas {
       display: block;
+      cursor: pointer;
     }
 
     #arrow-canvas {
@@ -402,6 +403,8 @@ let sfWorker         = null;
 let sfReady          = false;
 let currentEvalScore = null;  // number (pawns, white-relative) or null
 let currentBestMove  = '';    // UCI string
+let selectedSq       = null;  // currently selected square name e.g. 'e2'
+let legalDestSquares = [];    // legal destination squares for selected piece
 
 // ─── Canvas setup ─────────────────────────────────────────────────────────────
 
@@ -436,19 +439,23 @@ function sqToCenter(sq) {
 // ─── Board rendering ──────────────────────────────────────────────────────────
 
 function renderBoard(fen, lastFrom, lastTo) {
-  const chess = new Chess(fen);
-  const board = chess.board(); // [0][0] = a8
+  const chessInst = new Chess(fen);
+  const board     = chessInst.board(); // [0][0] = a8
 
   bCtx.clearRect(0, 0, 480, 480);
 
+  // Pass 1: squares + pieces
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
-      const sqName   = FILES[col] + (8 - row);
-      const isLight  = (row + col) % 2 === 0;
-      let   color    = isLight ? LIGHT_SQ : DARK_SQ;
+      const sqName  = FILES[col] + (8 - row);
+      const isLight = (row + col) % 2 === 0;
+      let   color   = isLight ? LIGHT_SQ : DARK_SQ;
 
       if (sqName === lastFrom || sqName === lastTo) {
         color = isLight ? HIGHLIGHT_LIGHT : HIGHLIGHT_DARK;
+      }
+      if (sqName === selectedSq) {
+        color = isLight ? '#a9c4e8' : '#7ea5cf';
       }
 
       bCtx.fillStyle = color;
@@ -462,8 +469,6 @@ function renderBoard(fen, lastFrom, lastTo) {
           bCtx.font         = `${SQ * 0.82}px 'Segoe UI Symbol', 'Apple Color Emoji', serif`;
           bCtx.textAlign    = 'center';
           bCtx.textBaseline = 'middle';
-
-          // Shadow for contrast on any square colour
           bCtx.shadowColor  = 'rgba(0,0,0,0.55)';
           bCtx.shadowBlur   = 3;
           bCtx.fillStyle    = piece.color === 'w' ? '#fff' : '#1a1a1a';
@@ -471,6 +476,25 @@ function renderBoard(fen, lastFrom, lastTo) {
           bCtx.shadowBlur   = 0;
         }
       }
+    }
+  }
+
+  // Pass 2: legal move indicators (drawn after pieces for correct z-order)
+  for (const dest of legalDestSquares) {
+    const { col, row } = sqToColRow(dest);
+    if (chessInst.get(dest)) {
+      // Capture target: ring around the piece
+      bCtx.beginPath();
+      bCtx.arc(col * SQ + SQ / 2, row * SQ + SQ / 2, SQ / 2 - 3, 0, 2 * Math.PI);
+      bCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+      bCtx.lineWidth   = 7;
+      bCtx.stroke();
+    } else {
+      // Empty square: small dot
+      bCtx.beginPath();
+      bCtx.arc(col * SQ + SQ / 2, row * SQ + SQ / 2, SQ * 0.17, 0, 2 * Math.PI);
+      bCtx.fillStyle = 'rgba(0,0,0,0.2)';
+      bCtx.fill();
     }
   }
 }
@@ -582,7 +606,9 @@ function updateMoveListHighlight() {
 
 function navigateTo(idx) {
   if (allFens.length === 0) return;
-  currentIdx = Math.max(0, Math.min(allFens.length - 1, idx));
+  currentIdx       = Math.max(0, Math.min(allFens.length - 1, idx));
+  selectedSq       = null;
+  legalDestSquares = [];
   renderPosition();
   analysePosition();
 }
@@ -617,6 +643,64 @@ function loadPgn() {
   }
 
   currentIdx = 0;
+  buildMoveList();
+  renderPosition();
+  analysePosition();
+}
+
+// ─── Interactive piece movement ──────────────────────────────────────────────
+
+function handleSquareClick(sq) {
+  if (allFens.length === 0) return;
+
+  const chessInst = new Chess(allFens[currentIdx]);
+  const piece     = chessInst.get(sq);
+  const turn      = chessInst.turn(); // 'w' or 'b'
+
+  if (selectedSq === null) {
+    // Select a piece belonging to the side to move
+    if (piece && piece.color === turn) {
+      selectedSq       = sq;
+      legalDestSquares = chessInst.moves({ square: sq, verbose: true }).map(m => m.to);
+      renderPosition();
+    }
+  } else {
+    if (sq === selectedSq) {
+      // Click same square — deselect
+      selectedSq       = null;
+      legalDestSquares = [];
+      renderPosition();
+    } else if (legalDestSquares.includes(sq)) {
+      // Legal destination — make the move
+      makeMove(selectedSq, sq);
+    } else if (piece && piece.color === turn) {
+      // Re-select a different piece of same colour
+      selectedSq       = sq;
+      legalDestSquares = chessInst.moves({ square: sq, verbose: true }).map(m => m.to);
+      renderPosition();
+    } else {
+      // Clicked elsewhere — deselect
+      selectedSq       = null;
+      legalDestSquares = [];
+      renderPosition();
+    }
+  }
+}
+
+function makeMove(from, to) {
+  const chessInst = new Chess(allFens[currentIdx]);
+  const move      = chessInst.move({ from, to, promotion: 'q' }); // auto-queen promotion
+  if (!move) return;
+
+  // Truncate game from current position and append the new move
+  allFens  = allFens.slice(0, currentIdx + 1);
+  allMoves = allMoves.slice(0, currentIdx);
+  allFens.push(chessInst.fen());
+  allMoves.push(move);
+
+  currentIdx++;
+  selectedSq       = null;
+  legalDestSquares = [];
   buildMoveList();
   renderPosition();
   analysePosition();
@@ -791,6 +875,17 @@ function init() {
   document.getElementById('btn-next').addEventListener('click',  () => navigateTo(currentIdx + 1));
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
+
+  // Board click — interactive piece movement
+  boardCanvas.addEventListener('click', e => {
+    const rect = boardCanvas.getBoundingClientRect();
+    const x    = e.clientX - rect.left;
+    const y    = e.clientY - rect.top;
+    const col  = Math.floor(x / SQ);
+    const row  = Math.floor(y / SQ);
+    if (col < 0 || col > 7 || row < 0 || row > 7) return;
+    handleSquareClick(FILES[col] + (8 - row));
+  });
 
   // Keyboard navigation
   document.addEventListener('keydown', e => {
