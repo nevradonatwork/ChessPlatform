@@ -341,7 +341,7 @@
       <button id="btn-prev"  title="Previous">◀</button>
       <button id="btn-next"  title="Next">▶</button>
       <button id="btn-end"   title="End">⏭</button>
-      <button id="btn-hint"  title="Show best move" disabled>Hint</button>
+      <button id="btn-hint"  title="Show best move">Hint</button>
       <span class="move-counter" id="move-counter">0 / 0</span>
       <div class="engine-status">
         <span id="engine-dot" class="loading"></span>
@@ -876,6 +876,104 @@ function resetEvalBar() {
   document.getElementById('eval-label').textContent       = '0.0';
 }
 
+// ─── Built-in minimax engine (hint fallback, no CDN) ─────────────────────────
+
+(function() {
+  const VAL = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
+
+  // Piece-square tables (white's perspective, index 0 = a8 row)
+  const PST_P = [
+     0,  0,  0,  0,  0,  0,  0,  0,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    10, 10, 20, 30, 30, 20, 10, 10,
+     5,  5, 10, 25, 25, 10,  5,  5,
+     0,  0,  0, 20, 20,  0,  0,  0,
+     5, -5,-10,  0,  0,-10, -5,  5,
+     5, 10, 10,-20,-20, 10, 10,  5,
+     0,  0,  0,  0,  0,  0,  0,  0
+  ];
+  const PST_N = [
+    -50,-40,-30,-30,-30,-30,-40,-50,
+    -40,-20,  0,  0,  0,  0,-20,-40,
+    -30,  0, 10, 15, 15, 10,  0,-30,
+    -30,  5, 15, 20, 20, 15,  5,-30,
+    -30,  0, 15, 20, 20, 15,  0,-30,
+    -30,  5, 10, 15, 15, 10,  5,-30,
+    -40,-20,  0,  5,  5,  0,-20,-40,
+    -50,-40,-30,-30,-30,-30,-40,-50
+  ];
+  const PST_B = [
+    -20,-10,-10,-10,-10,-10,-10,-20,
+    -10,  0,  0,  0,  0,  0,  0,-10,
+    -10,  0,  5, 10, 10,  5,  0,-10,
+    -10,  5,  5, 10, 10,  5,  5,-10,
+    -10,  0, 10, 10, 10, 10,  0,-10,
+    -10, 10, 10, 10, 10, 10, 10,-10,
+    -10,  5,  0,  0,  0,  0,  5,-10,
+    -20,-10,-10,-10,-10,-10,-10,-20
+  ];
+
+  function staticEval(chess) {
+    if (chess.in_checkmate()) return chess.turn() === 'w' ? -9999 : 9999;
+    if (chess.in_draw())      return 0;
+    let score = 0;
+    chess.board().forEach((row, ri) => row.forEach((p, ci) => {
+      if (!p) return;
+      const idx  = ri * 8 + ci;
+      const flip = p.color === 'b' ? (7 - ri) * 8 + ci : idx;
+      let v = (VAL[p.type] || 0);
+      if (p.type === 'p') v += PST_P[flip];
+      if (p.type === 'n') v += PST_N[flip];
+      if (p.type === 'b') v += PST_B[flip];
+      score += p.color === 'w' ? v : -v;
+    }));
+    return score;
+  }
+
+  function alphabeta(chess, depth, alpha, beta, maxing) {
+    if (depth === 0 || chess.game_over()) return staticEval(chess);
+    const moves = chess.moves();
+    if (maxing) {
+      for (const m of moves) {
+        chess.move(m);
+        const s = alphabeta(chess, depth - 1, alpha, beta, false);
+        chess.undo();
+        if (s > alpha) alpha = s;
+        if (beta <= alpha) break;
+      }
+      return alpha;
+    } else {
+      for (const m of moves) {
+        chess.move(m);
+        const s = alphabeta(chess, depth - 1, alpha, beta, true);
+        chess.undo();
+        if (s < beta) beta = s;
+        if (beta <= alpha) break;
+      }
+      return beta;
+    }
+  }
+
+  window.builtinBestMove = function(fen) {
+    const chess = new Chess(fen);
+    if (chess.game_over()) return null;
+    const isWhite = chess.turn() === 'w';
+    const moves   = chess.moves({ verbose: true });
+    let bestMove  = moves[0];
+    let bestScore = isWhite ? -Infinity : Infinity;
+    for (const mv of moves) {
+      chess.move(mv);
+      const s = alphabeta(chess, 3, -Infinity, Infinity, !isWhite);
+      chess.undo();
+      if (isWhite ? s > bestScore : s < bestScore) {
+        bestScore = s;
+        bestMove  = mv;
+      }
+    }
+    return bestMove ? bestMove.from + bestMove.to : null;
+  };
+})();
+
 // ─── UCI → SAN helper ────────────────────────────────────────────────────────
 
 function uciToSan(uci, fen) {
@@ -958,7 +1056,6 @@ function handleSfMessage(line) {
     currentBestMove = bm;
     const san = uciToSan(bm, allFens[currentIdx]);
     document.getElementById('bm-value').textContent = san;
-    document.getElementById('btn-hint').disabled = false;
     engineDot('complete');
   }
 }
@@ -970,7 +1067,6 @@ function analysePosition() {
   currentEvalScore = null;
   currentBestMove  = '';
   hintActive       = false;
-  document.getElementById('btn-hint').disabled = true;
   document.getElementById('bm-value').textContent = '—';
   resetEvalBar();
 
@@ -1001,6 +1097,11 @@ function init() {
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
   document.getElementById('btn-hint').addEventListener('click', () => {
+    if (!currentBestMove && allFens.length > 0) {
+      // Stockfish not available — compute with built-in engine
+      const uci = builtinBestMove(allFens[currentIdx]);
+      if (uci) currentBestMove = uci;
+    }
     hintActive = true;
     renderPosition();
   });
