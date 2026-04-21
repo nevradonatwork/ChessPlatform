@@ -605,7 +605,11 @@ function loadPgn() {
 
   allMoves = tempChess.history({ verbose: true });
 
-  const walker = new Chess();
+  // Respect custom starting FEN from [SetUp "1"] + [FEN "..."] headers
+  const headers  = tempChess.header();
+  const startFen = (headers.SetUp === '1' && headers.FEN) ? headers.FEN : new Chess().fen();
+
+  const walker = new Chess(startFen);
   allFens = [walker.fen()];
   for (const mv of allMoves) {
     walker.move(mv.san);
@@ -679,13 +683,15 @@ function uciToSan(uci, fen) {
 
 // ─── Stockfish ────────────────────────────────────────────────────────────────
 
-function initStockfish() {
+async function initStockfish() {
   engineDot('loading');
   try {
-    const blob = new Blob(
-      [`importScripts('https://unpkg.com/stockfish@10.0/stockfish.js');`],
-      { type: 'application/javascript' }
-    );
+    // Fetch Stockfish source so the blob worker is fully self-contained
+    // (browsers block importScripts to external URLs from blob: workers)
+    const resp = await fetch('https://unpkg.com/stockfish@10.0/stockfish.js');
+    if (!resp.ok) throw new Error('fetch ' + resp.status);
+    const src  = await resp.text();
+    const blob = new Blob([src], { type: 'application/javascript' });
     sfWorker = new Worker(URL.createObjectURL(blob));
     sfWorker.onmessage = e => handleSfMessage(e.data);
     sfWorker.onerror   = () => engineDot('error');
