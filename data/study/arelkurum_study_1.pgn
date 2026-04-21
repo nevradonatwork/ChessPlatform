@@ -1,0 +1,430 @@
+[Event "BLUNDER #1 — Move 40 — Endgame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "8/8/2P2p2/5k1P/6pK/6P1/5r2/4R3 b - - 0 40"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 40... Rf1 (98.6% loss)  | Best: Rh2#  | Theme: Checkmate  | Date: 2026.04.19 }
+1... Rh2# { Best move } *
+
+
+[Event "BLUNDER #2 — Move 22 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "5b1r/R1nkpppp/8/8/1nP2B2/6P1/1P3P1P/6K1 b - - 4 22"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 22... Nc6 (81.2% loss)  | Best: e5  | Theme: Positional mistake  | Date: 2026.04.19 }
+1... e5 { Best move } *
+
+
+[Event "BLUNDER #3 — Move 11 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r2qkbnr/1bp2pp1/p3p1np/1p6/4PB1P/P1NB1N2/1PP2PP1/R2QK2R w KQkq - 2 11"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 11. h5 (61.7% loss)  | Best: Bg3  | Theme: Positional mistake  | Date: 2026.04.18 }
+1. Bg3 { Best move } *
+
+
+[Event "BLUNDER #4 — Move 20 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1bk3r/1pp1n2N/p2p2p1/5pB1/2BPp3/P7/1PPN1KPP/R7 w - - 1 20"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 20. Bxe7+ (55.9% loss)  | Best: Nf6  | Theme: Positional mistake  | Date: 2026.04.10 }
+1. Nf6 { Best move } *
+
+
+[Event "BLUNDER #5 — Move 35 — Endgame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "7r/2r2k2/2Np2p1/pp3p2/3Pp3/P7/1PP1NKP1/4R3 w - - 1 35"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 35. Nxa5 (45.6% loss)  | Best: d5  | Theme: Endgame technique  | Date: 2026.04.10 }
+1. d5 { Best move } *
+
+
+[Event "BLUNDER #6 — Move 10 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r1b2rk1/pppp1pp1/3b1q1p/8/2BpP3/2NP4/PPP2PPP/R2Q1RK1 w - - 0 10"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 10. Qf3 (45.0% loss)  | Best: Nb5  | Theme: Opening principle  | Date: 2026.04.18 }
+1. Nb5 { Best move } *
+
+
+[Event "BLUNDER #7 — Move 6 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1bqk2r/pppp1ppp/2n5/2b1p3/2B1n3/2N2N2/PPPP1PPP/R1BQ1RK1 w kq - 0 6"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 6. a3 (43.5% loss)  | Best: Nxe4  | Theme: Piece capture  | Date: 2026.04.10 }
+1. Nxe4 { Best move } *
+
+
+[Event "BLUNDER #8 — Move 5 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.12"]
+[SetUp "1"]
+[FEN "r1bqkb1r/ppp2ppp/2n2n2/3pp3/8/1B2PN2/PPPP1PPP/RNBQ1RK1 b kq - 3 5"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 5... d4 (42.9% loss)  | Best: Bd6  | Theme: Opening principle  | Date: 2026.04.12 }
+1... Bd6 { Best move } *
+
+
+[Event "BLUNDER #9 — Move 22 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "2br4/ppp1nk2/3p1n1q/3Pp2p/4PP1B/2P5/P1P2QP1/R4RK1 b - - 2 22"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 22... Ng6 (41.5% loss)  | Best: Ng4  | Theme: Positional mistake  | Date: 2026.04.10 }
+1... Ng4 { Best move } *
+
+
+[Event "BLUNDER #10 — Move 17 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r2q4/ppp1nk2/3p1n2/4p2p/4P1bB/2PP4/P1PQ1PP1/R4RK1 b - - 3 17"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 17... Qh8 (40.7% loss)  | Best: Ng6  | Theme: Positional mistake  | Date: 2026.04.10 }
+1... Ng6 { Best move } *
+
+
+[Event "BLUNDER #11 — Move 26 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.12"]
+[SetUp "1"]
+[FEN "8/p5k1/2pp2p1/5pPp/5P1P/2P5/PP3K2/8 b - - 1 26"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 26... d5 (40.6% loss)  | Best: Kf7  | Theme: Positional mistake  | Date: 2026.04.12 }
+1... Kf7 { Best move } *
+
+
+[Event "BLUNDER #12 — Move 19 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r6q/ppp1nk2/3pbn2/4p2p/3PP2B/2P2P2/P1PQ2P1/R4RK1 b - - 0 19"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 19... Rd8 (37.8% loss)  | Best: Ng6  | Theme: Positional mistake  | Date: 2026.04.10 }
+1... Ng6 { Best move } *
+
+
+[Event "BLUNDER #13 — Move 5 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "rn2kbnr/ppp1pppp/8/4q3/6b1/2N2N2/PPPPBPPP/R1BQK2R b KQkq - 5 5"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 5... Qf4 (35.9% loss)  | Best: Bxf3  | Theme: Piece capture  | Date: 2026.04.19 }
+1... Bxf3 { Best move } *
+
+
+[Event "BLUNDER #14 — Move 14 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1bq4/ppp2k2/2np1n2/4p1pp/4P3/2PP2BP/P1P2PP1/R2Q1RK1 b - - 1 14"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 14... g4 (33.6% loss)  | Best: Kg6  | Theme: Positional mistake  | Date: 2026.04.10 }
+1... Kg6 { Best move } *
+
+
+[Event "BLUNDER #15 — Move 16 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r2q4/ppp2k2/2np1n2/4p2p/4P1b1/2PP2B1/P1PQ1PP1/R4RK1 b - - 1 16"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 16... Ne7 (31.2% loss)  | Best: h4  | Theme: Positional mistake  | Date: 2026.04.10 }
+1... h4 { Best move } *
+
+
+[Event "BLUNDER #16 — Move 22 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1b5/1pp1k3/p2p2p1/5pN1/2BPp3/P7/1PPN1KPr/R7 w - - 0 22"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | BLUNDER: 22. Nf1 (30.0% loss)  | Best: Nh3  | Theme: Positional mistake  | Date: 2026.04.10 }
+1. Nh3 { Best move } *
+
+
+[Event "BLUNDER #17 — Move 4 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.11"]
+[SetUp "1"]
+[FEN "rnb1kbnr/pp2pppp/1q1p4/2p3N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 1 4"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 4... Be6 (29.8% loss)  | Best: e6  | Theme: Opening principle  | Date: 2026.04.11 }
+1... e6 { Best move } *
+
+
+[Event "BLUNDER #18 — Move 8 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "r2q1rk1/ppp2ppp/2npbn2/2b1p1B1/2B1P3/1Q1P1N1P/PPP2PP1/RN2K2R b KQ - 3 8"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | BLUNDER: 8... Bxc4 (25.7% loss)  | Best: Na5  | Theme: Opening principle  | Date: 2026.04.19 }
+1... Na5 { Best move } *
+
+
+[Event "MISTAKE #19 — Move 7 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "r1bq1rk1/ppp2ppp/2np1n2/2b1p1B1/2B1P3/1Q1P3P/PPP2PP1/RN2K1NR b KQ - 1 7"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 7... Be6 (19.2% loss)  | Best: Nd4  | Theme: Opening principle  | Date: 2026.04.19 }
+1... Nd4 { Best move } *
+
+
+[Event "MISTAKE #20 — Move 6 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/1Q1P3P/PPP2PP1/RNB1K1NR b KQ - 0 6"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 6... d6 (19.2% loss)  | Best: Nd4  | Theme: Opening principle  | Date: 2026.04.19 }
+1... Nd4 { Best move } *
+
+
+[Event "MISTAKE #21 — Move 26 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "r4rk1/2p1qpp1/1b1p3p/pQ2p3/P1P1P3/3P1N1P/5PP1/RR3K2 b - - 4 26"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 26... f5 (18.6% loss)  | Best: Bc5  | Theme: Positional mistake  | Date: 2026.04.19 }
+1... Bc5 { Best move } *
+
+
+[Event "MISTAKE #22 — Move 43 — Endgame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "8/5k2/3p2p1/Np1P4/1P3pr1/r3p3/4N1P1/5RK1 w - - 2 43"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 43. Rxf4+ (17.0% loss)  | Best: Kh2  | Theme: Endgame technique  | Date: 2026.04.10 }
+1. Kh2 { Best move } *
+
+
+[Event "MISTAKE #23 — Move 12 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r2qk2r/1np1bpp1/p2p1n1p/1p2p3/4P3/2NPBN2/PPP1QPPP/2KRR3 w kq - 0 12"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 12. Nd5 (15.4% loss)  | Best: d4  | Theme: Positional mistake  | Date: 2026.04.18 }
+1. d4 { Best move } *
+
+
+[Event "MISTAKE #24 — Move 10 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r2qk2r/1bp1bpp1/p1np1n1p/1p1Bp3/4P3/2NPBN2/PPP1QPPP/2KR3R w kq - 2 10"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 10. Rhe1 (14.9% loss)  | Best: a3  | Theme: Opening principle  | Date: 2026.04.18 }
+1. a3 { Best move } *
+
+
+[Event "MISTAKE #25 — Move 26 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "1rb4r/2p1k3/p2p2p1/1p1B1p2/3Pp3/P5NN/1PP2KP1/R7 w - - 4 26"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 26. Re1 (14.7% loss)  | Best: Nf4  | Theme: Positional mistake  | Date: 2026.04.10 }
+1. Nf4 { Best move } *
+
+
+[Event "MISTAKE #26 — Move 13 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.12"]
+[SetUp "1"]
+[FEN "r4rk1/ppp1bppp/2n2n2/8/8/N1P2B1P/PP3PP1/R1B1R1K1 b - - 0 13"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 13... Bc5 (14.7% loss)  | Best: Bxa3  | Theme: Piece capture  | Date: 2026.04.12 }
+1... Bxa3 { Best move } *
+
+
+[Event "MISTAKE #27 — Move 6 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.11"]
+[SetUp "1"]
+[FEN "r1bqk2r/ppp2ppp/2nbpn2/3p4/3P4/2N1PNP1/PPP1KPBP/R1BQR3 b kq - 5 6"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 6... e5 (14.5% loss)  | Best: Ne4  | Theme: Opening principle  | Date: 2026.04.11 }
+1... Ne4 { Best move } *
+
+
+[Event "MISTAKE #28 — Move 37 — Endgame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "7r/5k2/3p2p1/Np3p2/1P1Pp3/P7/r3NKP1/4R3 w - - 1 37"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 37. Kg1 (14.5% loss)  | Best: d5  | Theme: Endgame technique  | Date: 2026.04.10 }
+1. d5 { Best move } *
+
+
+[Event "MISTAKE #29 — Move 17 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "2r2rk1/bpp2pp1/p1npq2p/3Np3/QPP1P3/P2P1N1P/5PP1/R4RK1 b - - 0 17"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 17... Ne7 (14.3% loss)  | Best: f5  | Theme: Positional mistake  | Date: 2026.04.19 }
+1... f5 { Best move } *
+
+
+[Event "MISTAKE #30 — Move 14 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r2qk2r/1np2pp1/p2p3p/1p1Pp1b1/8/3PBN2/PPP1QPPP/2KRR3 w kq - 1 14"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 14. a3 (13.5% loss)  | Best: d4  | Theme: Positional mistake  | Date: 2026.04.18 }
+1. d4 { Best move } *
+
+
+[Event "MISTAKE #31 — Move 15 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1bq4/ppp2k2/2np1n2/4p2p/4P1P1/2PP2B1/P1P2PP1/R2Q1RK1 b - - 0 15"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 15... Bxg4 (13.3% loss)  | Best: Nxg4  | Theme: Piece capture  | Date: 2026.04.10 }
+1... Nxg4 { Best move } *
+
+
+[Event "MISTAKE #32 — Move 13 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.11"]
+[SetUp "1"]
+[FEN "r2qk2r/ppp3pp/4p3/4b3/8/4PPP1/PPP2K1P/R1BQR3 b kq - 1 13"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 13... Qxd1 (13.0% loss)  | Best: Qf6  | Theme: Positional mistake  | Date: 2026.04.11 }
+1... Qf6 { Best move } *
+
+
+[Event "MISTAKE #33 — Move 6 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.12"]
+[SetUp "1"]
+[FEN "r1bqkb1r/ppp2ppp/2n2n2/4p3/3P4/1B3N2/PPPP1PPP/RNBQ1RK1 b kq - 0 6"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 6... exd4 (12.9% loss)  | Best: Nxd4  | Theme: Piece capture  | Date: 2026.04.12 }
+1... Nxd4 { Best move } *
+
+
+[Event "MISTAKE #34 — Move 4 — Opening"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "rnb1k1nr/pppp1ppp/4pq2/8/1b1PP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 3 4"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 4. Bd2 (12.8% loss)  | Best: c3  | Theme: Opening principle  | Date: 2026.04.19 }
+1. c3 { Best move } *
+
+
+[Event "MISTAKE #35 — Move 17 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.12"]
+[SetUp "1"]
+[FEN "5rk1/ppp2ppp/2n2n2/8/8/N1P1RB1P/PP3PP1/6K1 b - - 0 17"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 17... Re8 (12.7% loss)  | Best: Nd8  | Theme: Positional mistake  | Date: 2026.04.12 }
+1... Nd8 { Best move } *
+
+
+[Event "MISTAKE #36 — Move 19 — Middlegame"]
+[Site "Hypatia — arelkurum"]
+[Date "2026.04.10"]
+[SetUp "1"]
+[FEN "r1bk3r/1pp4p/p1np1Np1/5pB1/2BPp3/P7/1PPN1KPP/R7 w - - 3 19"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 19. Nxh7+ (10.4% loss)  | Best: Nfxe4+  | Theme: Capture with check  | Date: 2026.04.10 }
+1. Nfxe4+ { Best move } *

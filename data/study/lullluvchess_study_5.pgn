@@ -1,0 +1,346 @@
+[Event "MISTAKE #1 — Move 60 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.16"]
+[SetUp "1"]
+[FEN "8/1R6/6rk/pK6/8/8/5b2/8 b - - 5 60"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 60... Be1 (11.2% loss)  | Best: Rb6+  | Theme: Forcing check  | Date: 2026.04.16 }
+1... Rb6+ { Best move } *
+
+
+[Event "MISTAKE #2 — Move 13 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "r2q1rk1/ppp1bppp/2n5/5b2/3PN3/P3P1P1/1P3PBP/R1BQ1RK1 b - - 0 13"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 13... Bxe4 (11.2% loss)  | Best: Re8  | Theme: Positional mistake  | Date: 2026.04.20 }
+1... Re8 { Best move } *
+
+
+[Event "MISTAKE #3 — Move 4 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "rnbqkbnr/pp3ppp/2p1p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 0 4"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 4. c5 (11.2% loss)  | Best: g3  | Theme: Opening principle  | Date: 2026.04.15 }
+1. g3 { Best move } *
+
+
+[Event "MISTAKE #4 — Move 15 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r1bq1rk1/pp4pp/2pNp3/3nPp2/2B1p2P/8/PPP2PP1/R2QK2R b KQ - 0 15"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 15... e3 (11.1% loss)  | Best: Qb6  | Theme: Positional mistake  | Date: 2026.04.18 }
+1... Qb6 { Best move } *
+
+
+[Event "MISTAKE #5 — Move 2 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "r1bqkbnr/pppppppp/2n5/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 2. c3 (11.0% loss)  | Best: d4  | Theme: Opening principle  | Date: 2026.04.20 }
+1. d4 { Best move } *
+
+
+[Event "MISTAKE #6 — Move 32 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "4rrk1/6pp/4pq2/2p2p1P/2Q5/P1P5/6P1/5RKR b - - 0 32"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 32... Rc8 (10.9% loss)  | Best: Kh8  | Theme: Endgame technique  | Date: 2026.04.18 }
+1... Kh8 { Best move } *
+
+
+[Event "MISTAKE #7 — Move 20 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "1r1q1rk1/2p2ppp/4b3/p3P3/1nP2P2/1PBp2P1/P5BP/R2Q1R1K b - - 2 20"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 20... Bf5 (10.8% loss)  | Best: Qd7  | Theme: Positional mistake  | Date: 2026.04.19 }
+1... Qd7 { Best move } *
+
+
+[Event "MISTAKE #8 — Move 27 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.17"]
+[SetUp "1"]
+[FEN "1r3rk1/6pp/1p3p2/p2P4/P1P2P2/7P/6P1/R4RK1 b - - 0 27"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 27... f5 (10.7% loss)  | Best: Rbc8  | Theme: Positional mistake  | Date: 2026.04.17 }
+1... Rbc8 { Best move } *
+
+
+[Event "MISTAKE #9 — Move 45 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "8/2R5/2p1rn2/5k2/3B2p1/P4P2/1PPK4/8 b - - 0 45"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 45... gxf3 (10.7% loss)  | Best: g3  | Theme: Endgame technique  | Date: 2026.04.15 }
+1... g3 { Best move } *
+
+
+[Event "MISTAKE #10 — Move 12 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.18"]
+[SetUp "1"]
+[FEN "r1bq1rk1/ppp1n1pp/4p3/1N1nBp2/2BPp3/8/PPP2PPP/R2QK2R b KQ - 4 12"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 12... c6 (10.7% loss)  | Best: Bd7  | Theme: Positional mistake  | Date: 2026.04.18 }
+1... Bd7 { Best move } *
+
+
+[Event "MISTAKE #11 — Move 31 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "8/k2q2p1/p2b1p1p/PrpPp3/4P2P/4BPK1/Q6P/1R6 b - - 1 31"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 31... g5 (10.7% loss)  | Best: h5  | Theme: Endgame technique  | Date: 2026.04.19 }
+1... h5 { Best move } *
+
+
+[Event "MISTAKE #12 — Move 7 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "rnbq1rk1/ppp1bppp/3pp1n1/8/3PP3/2N2N2/PPP1BPPP/R1BQK2R w KQ - 1 7"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 7. O-O (10.5% loss)  | Best: h4  | Theme: Opening principle  | Date: 2026.04.15 }
+1. h4 { Best move } *
+
+
+[Event "MISTAKE #13 — Move 52 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "8/r5pk/1R6/3K1p1p/2pP1P2/2P1P3/p1b5/R7 b - - 0 52"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 52... Bd3 (10.5% loss)  | Best: h4  | Theme: Endgame technique  | Date: 2026.04.19 }
+1... h4 { Best move } *
+
+
+[Event "MISTAKE #14 — Move 29 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "r3r1k1/p1P2pp1/1p3b1p/1q6/3P4/4PN2/5RPP/2Q2RK1 w - - 0 29"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 29. Ne5 (10.5% loss)  | Best: Rd1  | Theme: Positional mistake  | Date: 2026.04.15 }
+1. Rd1 { Best move } *
+
+
+[Event "MISTAKE #15 — Move 8 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "r1bqr1k1/pppnppbp/3p1np1/8/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 w - - 3 8"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 8. Nb3 (10.5% loss)  | Best: b4  | Theme: Opening principle  | Date: 2026.04.20 }
+1. b4 { Best move } *
+
+
+[Event "MISTAKE #16 — Move 24 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.16"]
+[SetUp "1"]
+[FEN "r6r/pRp2k2/1b1p3p/3P2p1/P4p2/3P1N2/6PP/2R4K b - - 0 24"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 24... a5 (10.5% loss)  | Best: Rab8  | Theme: Positional mistake  | Date: 2026.04.16 }
+1... Rab8 { Best move } *
+
+
+[Event "MISTAKE #17 — Move 58 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "3n4/8/6k1/1n6/4KP2/8/8/8 b - - 1 58"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 58... Nc6 (10.5% loss)  | Best: Nd6+  | Theme: Forcing check  | Date: 2026.04.20 }
+1... Nd6+ { Best move } *
+
+
+[Event "MISTAKE #18 — Move 38 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "5rk1/6p1/p1b1p2p/3p1p2/P1pP1P2/q1P1P3/1Q3R2/2K3R1 b - - 5 38"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 38... Qxb2+ (10.4% loss)  | Best: Qxa4  | Theme: Piece capture  | Date: 2026.04.19 }
+1... Qxa4 { Best move } *
+
+
+[Event "MISTAKE #19 — Move 7 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "r1bqkb1r/ppppn1pp/5p2/4p3/4P3/1B3N2/PPPP1PPP/R1BQK2R b KQkq - 2 7"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 7... c6 (10.4% loss)  | Best: c5  | Theme: Opening principle  | Date: 2026.04.15 }
+1... c5 { Best move } *
+
+
+[Event "MISTAKE #20 — Move 7 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.16"]
+[SetUp "1"]
+[FEN "r1bqkbnr/pp3ppp/2n1p3/1B1pP3/2pP4/1P3N2/P1P2PPP/RNBQ1RK1 b kq - 0 7"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 7... c3 (10.4% loss)  | Best: Ne7  | Theme: Opening principle  | Date: 2026.04.16 }
+1... Ne7 { Best move } *
+
+
+[Event "MISTAKE #21 — Move 41 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.16"]
+[SetUp "1"]
+[FEN "8/7p/6k1/p1Pp2p1/P1bP3q/5pQP/3B1PP1/6K1 b - - 4 41"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 41... fxg2 (10.3% loss)  | Best: Qxg3  | Theme: Piece capture  | Date: 2026.04.16 }
+1... Qxg3 { Best move } *
+
+
+[Event "MISTAKE #22 — Move 14 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.17"]
+[SetUp "1"]
+[FEN "r2q1rk1/pppbb1pp/2n1p1n1/1B1pP3/3P2P1/2N2N1P/PPPQ1P2/R4RK1 b - - 0 14"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 14... Nh4 (10.3% loss)  | Best: Rxf3  | Theme: Piece capture  | Date: 2026.04.17 }
+1... Rxf3 { Best move } *
+
+
+[Event "MISTAKE #23 — Move 7 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "rn1qk1nr/1bppbppp/p3p3/8/2pP4/1P2PN2/P3BPPP/RNBQK2R w KQkq - 0 7"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 7. Bxc4 (10.3% loss)  | Best: bxc4  | Theme: Opening principle  | Date: 2026.04.20 }
+1. bxc4 { Best move } *
+
+
+[Event "MISTAKE #24 — Move 14 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "r2qkbnr/5ppp/2n1b3/3p2N1/pp1P4/8/PPPB1PPP/RN1Q1RK1 b kq - 3 14"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 14... Qf6 (10.3% loss)  | Best: Nf6  | Theme: Positional mistake  | Date: 2026.04.20 }
+1... Nf6 { Best move } *
+
+
+[Event "MISTAKE #25 — Move 37 — Endgame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.20"]
+[SetUp "1"]
+[FEN "r2n2k1/5q2/4p3/1P1pQ2p/p3n1p1/8/PP2RPP1/4R1K1 b - - 2 37"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 37... Nb7 (10.3% loss)  | Best: Rc8  | Theme: Endgame technique  | Date: 2026.04.20 }
+1... Rc8 { Best move } *
+
+
+[Event "MISTAKE #26 — Move 28 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.19"]
+[SetUp "1"]
+[FEN "1r4k1/6p1/q1p1p2p/p1PpPp2/P1bP4/4P3/6PP/R2QR1K1 w - - 0 28"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 28. Qf3 (10.2% loss)  | Best: Qd2  | Theme: Positional mistake  | Date: 2026.04.19 }
+1. Qd2 { Best move } *
+
+
+[Event "MISTAKE #27 — Move 24 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.17"]
+[SetUp "1"]
+[FEN "3rr1k1/1p3p2/p1p2qp1/P1Ppb2p/1P4B1/1R1QP3/5PPP/5RK1 w - - 0 24"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 24. Bh3 (10.2% loss)  | Best: Be2  | Theme: Positional mistake  | Date: 2026.04.17 }
+1. Be2 { Best move } *
+
+
+[Event "MISTAKE #28 — Move 4 — Opening"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.16"]
+[SetUp "1"]
+[FEN "rnbqkbnr/pp3ppp/2p1p3/3pP3/3P4/P7/1PP2PPP/RNBQKBNR b KQkq - 0 4"]
+[Result "*"]
+[Orientation "black"]
+
+{ Black to move. Find the best move!  | MISTAKE: 4... f5 (10.0% loss)  | Best: c5  | Theme: Opening principle  | Date: 2026.04.16 }
+1... c5 { Best move } *
+
+
+[Event "MISTAKE #29 — Move 28 — Middlegame"]
+[Site "Hypatia — lullluvchess"]
+[Date "2026.04.15"]
+[SetUp "1"]
+[FEN "1r3rk1/1p1n2p1/pPp3bp/2Pp1p2/1P1PpPPq/4P2P/4BR2/R2Q2K1 w - - 5 28"]
+[Result "*"]
+[Orientation "white"]
+
+{ White to move. Find the best move!  | MISTAKE: 28. Rh2 (10.0% loss)  | Best: Rg2  | Theme: Positional mistake  | Date: 2026.04.15 }
+1. Rg2 { Best move } *
