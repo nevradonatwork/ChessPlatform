@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess Coach</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="chess.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -991,8 +991,23 @@ function uciToSan(uci, fen) {
 
 async function initStockfish() {
   engineDot('loading');
+
+  // The <script type="text/js-worker" id="sf-src"> element comes after this
+  // script block in the HTML, so the browser hasn't parsed it yet when init()
+  // runs synchronously.  Wait until DOMContentLoaded so the full document is
+  // available before we read its textContent.
+  await new Promise(resolve => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', resolve, { once: true });
+    } else {
+      resolve();
+    }
+  });
+
   try {
-    const src  = document.getElementById('sf-src').textContent;
+    const el   = document.getElementById('sf-src');
+    if (!el) throw new Error('sf-src element not found');
+    const src  = el.textContent;
     const blob = new Blob([src], { type: 'application/javascript' });
     sfWorker   = new Worker(URL.createObjectURL(blob));
     sfWorker.onmessage = e => handleSfMessage(e.data);
