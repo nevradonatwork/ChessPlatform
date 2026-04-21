@@ -42,16 +42,15 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      width: 480px;
+      width: 500px;
       flex-shrink: 0;
     }
 
     .board-container {
       position: relative;
-      width: 480px;
-      height: 480px;
+      width: 500px;
+      height: 500px;
       border-radius: var(--radius);
-      overflow: hidden;
     }
 
     #board-canvas {
@@ -333,8 +332,8 @@
   <div class="left-col">
 
     <div class="board-container">
-      <canvas id="board-canvas" width="480" height="480"></canvas>
-      <canvas id="arrow-canvas" width="480" height="480"></canvas>
+      <canvas id="board-canvas" width="500" height="500"></canvas>
+      <canvas id="arrow-canvas" width="500" height="500"></canvas>
     </div>
 
     <div class="controls-bar">
@@ -387,12 +386,17 @@ const DARK_SQ         = '#b58863';
 const HIGHLIGHT_LIGHT = '#cdd16e';
 const HIGHLIGHT_DARK  = '#aaa23a';
 const SQ              = 60; // logical pixels per square
+const BOARD_SIZE      = 480;
+const MARGIN          = 20;
 const FILES           = 'abcdefgh';
 
 const GLYPHS = {
   wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
   bK:'♚', bQ:'♛', bR:'♜', bB:'♝', bN:'♞', bP:'♟'
 };
+
+const PIECE_IMGS = {};
+const PIECE_KEYS = ['wK','wQ','wR','wB','wN','wP','bK','bQ','bR','bB','bN','bP'];
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -406,6 +410,18 @@ let currentBestMove  = '';    // UCI string
 let selectedSq       = null;  // currently selected square name e.g. 'e2'
 let legalDestSquares = [];    // legal destination squares for selected piece
 
+// Drag-and-drop state
+let isDragging       = false;
+let dragSq           = null;
+let dragPiece        = null;
+let dragX            = 0;
+let dragY            = 0;
+let _dragStartSq     = null;
+let _dragStartPiece  = null;
+let _dragStartX      = 0;
+let _dragStartY      = 0;
+let _suppressClick   = false;
+
 // ─── Canvas setup ─────────────────────────────────────────────────────────────
 
 const boardCanvas = document.getElementById('board-canvas');
@@ -414,12 +430,13 @@ const bCtx        = boardCanvas.getContext('2d');
 const aCtx        = arrowCanvas.getContext('2d');
 
 (function initCanvases() {
-  const dpr = window.devicePixelRatio || 1;
+  const dpr  = window.devicePixelRatio || 1;
+  const size = BOARD_SIZE + MARGIN; // 500
   [boardCanvas, arrowCanvas].forEach(c => {
-    c.width        = 480 * dpr;
-    c.height       = 480 * dpr;
-    c.style.width  = '480px';
-    c.style.height = '480px';
+    c.width        = size * dpr;
+    c.height       = size * dpr;
+    c.style.width  = size + 'px';
+    c.style.height = size + 'px';
   });
   bCtx.scale(dpr, dpr);
   aCtx.scale(dpr, dpr);
@@ -436,13 +453,25 @@ function sqToCenter(sq) {
   return { x: col * SQ + SQ / 2, y: row * SQ + SQ / 2 };
 }
 
+// ─── Piece image loader ───────────────────────────────────────────────────────
+
+function loadPieceImages() {
+  return Promise.all(PIECE_KEYS.map(key => new Promise(resolve => {
+    const img   = new Image();
+    img.onload  = () => { PIECE_IMGS[key] = img; resolve(); };
+    img.onerror = () => resolve(); // Unicode fallback if CDN unreachable
+    img.src     = `https://lichess1.org/assets/piece/cburnett/${key}.svg`;
+  })));
+}
+
 // ─── Board rendering ──────────────────────────────────────────────────────────
 
 function renderBoard(fen, lastFrom, lastTo) {
   const chessInst = new Chess(fen);
   const board     = chessInst.board(); // [0][0] = a8
+  const total     = BOARD_SIZE + MARGIN; // 500
 
-  bCtx.clearRect(0, 0, 480, 480);
+  bCtx.clearRect(0, 0, total, total);
 
   // Pass 1: squares + pieces
   for (let row = 0; row < 8; row++) {
@@ -462,18 +491,23 @@ function renderBoard(fen, lastFrom, lastTo) {
       bCtx.fillRect(col * SQ, row * SQ, SQ, SQ);
 
       const piece = board[row][col];
-      if (piece) {
-        const key   = piece.color + piece.type.toUpperCase();
-        const glyph = GLYPHS[key];
-        if (glyph) {
-          bCtx.font         = `${SQ * 0.82}px 'Segoe UI Symbol', 'Apple Color Emoji', serif`;
-          bCtx.textAlign    = 'center';
-          bCtx.textBaseline = 'middle';
-          bCtx.shadowColor  = 'rgba(0,0,0,0.55)';
-          bCtx.shadowBlur   = 3;
-          bCtx.fillStyle    = piece.color === 'w' ? '#fff' : '#1a1a1a';
-          bCtx.fillText(glyph, col * SQ + SQ / 2, row * SQ + SQ / 2 + 1);
-          bCtx.shadowBlur   = 0;
+      // Skip the piece being dragged — it floats on the arrow canvas
+      if (piece && !(isDragging && sqName === dragSq)) {
+        const key = piece.color + piece.type.toUpperCase();
+        if (PIECE_IMGS[key]) {
+          bCtx.drawImage(PIECE_IMGS[key], col * SQ, row * SQ, SQ, SQ);
+        } else {
+          const glyph = GLYPHS[key];
+          if (glyph) {
+            bCtx.font         = `${SQ * 0.82}px 'Segoe UI Symbol', 'Apple Color Emoji', serif`;
+            bCtx.textAlign    = 'center';
+            bCtx.textBaseline = 'middle';
+            bCtx.shadowColor  = 'rgba(0,0,0,0.55)';
+            bCtx.shadowBlur   = 3;
+            bCtx.fillStyle    = piece.color === 'w' ? '#fff' : '#1a1a1a';
+            bCtx.fillText(glyph, col * SQ + SQ / 2, row * SQ + SQ / 2 + 1);
+            bCtx.shadowBlur   = 0;
+          }
         }
       }
     }
@@ -483,26 +517,64 @@ function renderBoard(fen, lastFrom, lastTo) {
   for (const dest of legalDestSquares) {
     const { col, row } = sqToColRow(dest);
     if (chessInst.get(dest)) {
-      // Capture target: ring around the piece
       bCtx.beginPath();
       bCtx.arc(col * SQ + SQ / 2, row * SQ + SQ / 2, SQ / 2 - 3, 0, 2 * Math.PI);
       bCtx.strokeStyle = 'rgba(0,0,0,0.3)';
       bCtx.lineWidth   = 7;
       bCtx.stroke();
     } else {
-      // Empty square: small dot
       bCtx.beginPath();
       bCtx.arc(col * SQ + SQ / 2, row * SQ + SQ / 2, SQ * 0.17, 0, 2 * Math.PI);
       bCtx.fillStyle = 'rgba(0,0,0,0.2)';
       bCtx.fill();
     }
   }
+
+  // Pass 3: coordinate labels in margin strips
+  bCtx.font         = '12px IBM Plex Mono, monospace';
+  bCtx.fillStyle    = '#888888';
+  bCtx.shadowBlur   = 0;
+
+  // File labels (a–h) along the bottom
+  bCtx.textAlign    = 'center';
+  bCtx.textBaseline = 'middle';
+  for (let c = 0; c < 8; c++) {
+    bCtx.fillText(FILES[c], c * SQ + SQ / 2, BOARD_SIZE + MARGIN / 2);
+  }
+
+  // Rank labels (8–1) along the right
+  for (let r = 0; r < 8; r++) {
+    bCtx.fillText(String(8 - r), BOARD_SIZE + MARGIN / 2, r * SQ + SQ / 2);
+  }
 }
 
 // ─── Arrow drawing ────────────────────────────────────────────────────────────
 
 function clearArrow() {
-  aCtx.clearRect(0, 0, 480, 480);
+  aCtx.clearRect(0, 0, BOARD_SIZE + MARGIN, BOARD_SIZE + MARGIN);
+}
+
+// ─── Drag piece overlay ───────────────────────────────────────────────────────
+
+function drawDragPiece() {
+  if (!isDragging || !dragPiece) return;
+  const key  = dragPiece.color + dragPiece.type.toUpperCase();
+  const size = SQ * 1.15;
+  if (PIECE_IMGS[key]) {
+    aCtx.drawImage(PIECE_IMGS[key], dragX - size / 2, dragY - size / 2, size, size);
+  } else {
+    const glyph = GLYPHS[key];
+    if (glyph) {
+      aCtx.font         = `${size * 0.9}px 'Segoe UI Symbol', 'Apple Color Emoji', serif`;
+      aCtx.textAlign    = 'center';
+      aCtx.textBaseline = 'middle';
+      aCtx.shadowColor  = 'rgba(0,0,0,0.55)';
+      aCtx.shadowBlur   = 4;
+      aCtx.fillStyle    = dragPiece.color === 'w' ? '#fff' : '#1a1a1a';
+      aCtx.fillText(glyph, dragX, dragY + 1);
+      aCtx.shadowBlur   = 0;
+    }
+  }
 }
 
 function renderArrow(fromSq, toSq) {
@@ -568,6 +640,7 @@ function renderPosition() {
   const lastMove = currentIdx > 0 ? allMoves[currentIdx - 1] : null;
   renderBoard(allFens[currentIdx], lastMove ? lastMove.from : null, lastMove ? lastMove.to : null);
   renderArrow(lastMove ? lastMove.from : null, lastMove ? lastMove.to : null);
+  if (isDragging) drawDragPiece(); // floating piece on top of arrow layer
   updateFenDisplay();
   updateMoveCounter();
   updateMoveListHighlight();
@@ -866,7 +939,8 @@ function resetToStart() {
 
 function init() {
   resetToStart();
-  renderPosition();
+  renderPosition(); // immediate render (Unicode fallback until images load)
+  loadPieceImages().then(() => renderPosition()); // re-render with SVG pieces
   initStockfish();
 
   // Button event listeners
@@ -876,8 +950,83 @@ function init() {
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
 
-  // Board click — interactive piece movement
+  // ─── Drag-and-drop ────────────────────────────────────────────────────────
+
+  boardCanvas.addEventListener('mousedown', e => {
+    if (allFens.length === 0) return;
+    const rect = boardCanvas.getBoundingClientRect();
+    const x    = e.clientX - rect.left;
+    const y    = e.clientY - rect.top;
+    const col  = Math.floor(x / SQ);
+    const row  = Math.floor(y / SQ);
+    if (col < 0 || col > 7 || row < 0 || row > 7) return;
+    const sq         = FILES[col] + (8 - row);
+    const chessInst  = new Chess(allFens[currentIdx]);
+    const piece      = chessInst.get(sq);
+    if (piece && piece.color === chessInst.turn()) {
+      _dragStartSq    = sq;
+      _dragStartPiece = piece;
+      _dragStartX     = x;
+      _dragStartY     = y;
+    }
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!_dragStartSq) return;
+    const rect = boardCanvas.getBoundingClientRect();
+    const x    = e.clientX - rect.left;
+    const y    = e.clientY - rect.top;
+    if (!isDragging) {
+      const dx = x - _dragStartX, dy = y - _dragStartY;
+      if (dx * dx + dy * dy < 25) return; // threshold 5px
+      isDragging        = true;
+      dragSq            = _dragStartSq;
+      dragPiece         = _dragStartPiece;
+      selectedSq        = dragSq;
+      legalDestSquares  = new Chess(allFens[currentIdx])
+                            .moves({ square: dragSq, verbose: true })
+                            .map(m => m.to);
+      boardCanvas.style.cursor = 'grabbing';
+    }
+    dragX = x;
+    dragY = y;
+    renderPosition();
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (!isDragging) {
+      _dragStartSq = null; _dragStartPiece = null;
+      return;
+    }
+    const rect   = boardCanvas.getBoundingClientRect();
+    const x      = e.clientX - rect.left;
+    const y      = e.clientY - rect.top;
+    const col    = Math.floor(x / SQ);
+    const row    = Math.floor(y / SQ);
+    const dropSq = (col >= 0 && col <= 7 && row >= 0 && row <= 7)
+                    ? FILES[col] + (8 - row) : null;
+
+    isDragging   = false;
+    dragPiece    = null;
+    const fromSq = dragSq;
+    dragSq       = null;
+    _dragStartSq = null; _dragStartPiece = null;
+    boardCanvas.style.cursor = 'pointer';
+    _suppressClick = true;
+
+    if (dropSq && legalDestSquares.includes(dropSq)) {
+      makeMove(fromSq, dropSq);
+    } else {
+      selectedSq       = null;
+      legalDestSquares = [];
+      renderPosition();
+    }
+  });
+
+  // ─── Click (piece selection / click-to-move) ──────────────────────────────
+
   boardCanvas.addEventListener('click', e => {
+    if (_suppressClick) { _suppressClick = false; return; }
     const rect = boardCanvas.getBoundingClientRect();
     const x    = e.clientX - rect.left;
     const y    = e.clientY - rect.top;
