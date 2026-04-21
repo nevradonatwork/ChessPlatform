@@ -991,25 +991,14 @@ function uciToSan(uci, fen) {
 
 async function initStockfish() {
   engineDot('loading');
-  const CDNS = [
-    'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js',
-    'https://unpkg.com/stockfish@10.0/stockfish.js',
-  ];
-  for (const url of CDNS) {
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) continue;
-      const src  = await resp.text();
-      if (src.length < 1000) continue; // guard against redirect/error pages
-      const blob = new Blob([src], { type: 'application/javascript' });
-      sfWorker = new Worker(URL.createObjectURL(blob));
-      sfWorker.onmessage = e => handleSfMessage(e.data);
-      sfWorker.onerror   = () => engineDot('error');
-      sfWorker.postMessage('uci');
-      return; // success — stop trying CDNs
-    } catch (_) { /* try next URL */ }
+  try {
+    sfWorker = new Worker('stockfish.js');
+    sfWorker.onmessage = e => handleSfMessage(e.data);
+    sfWorker.onerror   = () => engineDot('error');
+    sfWorker.postMessage('uci');
+  } catch (_) {
+    engineDot('error');
   }
-  engineDot('error');
 }
 
 function handleSfMessage(line) {
