@@ -322,6 +322,73 @@
       font-weight: 600;
     }
 
+    /* ---- Study panel ---- */
+    .study-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #chapter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.12s;
+    }
+
+    .chapter-item:hover { background: var(--surface2); }
+
+    .chapter-item.active {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+
+    .chapter-num {
+      color: var(--accent);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      min-width: 22px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .chapter-title {
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    #btn-load-study {
+      background: var(--surface2);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      border-radius: var(--radius);
+      padding: 6px 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s;
+      align-self: flex-end;
+    }
+
+    #btn-load-study:hover { background: var(--border); }
+
   </style>
 </head>
 <body>
@@ -362,7 +429,11 @@
     <div class="pgn-section">
       <span class="pgn-label">Paste PGN</span>
       <textarea id="pgn-input" placeholder="[Event &quot;Test Game&quot;]&#10;[White &quot;Player1&quot;]&#10;[Black &quot;Player2&quot;]&#10;&#10;1. e4 e5 2. Nf3 ..."></textarea>
-      <button id="btn-load-pgn">Load Game</button>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="btn-load-pgn">Load Game</button>
+        <input type="file" id="study-file-input" accept=".pgn" style="display:none">
+        <button id="btn-load-study">Load Study</button>
+      </div>
     </div>
 
   </div>
@@ -373,6 +444,11 @@
     <div class="engine-panel">
       <div class="panel-header">Engine Analysis</div>
       <div id="best-move-display"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
+    </div>
+
+    <div class="study-panel" id="study-panel" style="display:none">
+      <div class="panel-header">Study Chapters</div>
+      <div id="chapter-list"></div>
     </div>
 
   </div>
@@ -413,6 +489,10 @@ let legalDestSquares = [];    // legal destination squares for selected piece
 
 let hintActive       = false;  // true while hint arrow is visible
 let hintPending      = false;  // true when hint was pressed but bestmove not yet received
+
+// Study file state
+let allChapters    = [];   // array of PGN strings (one per game in the study file)
+let currentChapter = -1;  // index of currently active chapter
 
 // Drag-and-drop state
 let isDragging       = false;
@@ -737,8 +817,7 @@ function navigateTo(idx) {
 
 // ─── PGN loading ──────────────────────────────────────────────────────────────
 
-function loadPgn() {
-  const pgnText = document.getElementById('pgn-input').value.trim();
+function loadPgnText(pgnText) {
   if (!pgnText) { alert('Please paste a PGN first.'); return; }
 
   let tempChess;
@@ -765,9 +844,72 @@ function loadPgn() {
   }
 
   currentIdx = 0;
+  hintActive = false; hintPending = false;
   buildMoveList();
   renderPosition();
   analysePosition();
+}
+
+function loadPgn() {
+  loadPgnText(document.getElementById('pgn-input').value.trim());
+}
+
+// ─── Study file ───────────────────────────────────────────────────────────────
+
+function parseMultiPgn(text) {
+  return text
+    .split(/\n(?=\[Event\s)/)
+    .map(s => s.trim())
+    .filter(s => s.startsWith('['));
+}
+
+function extractChapterTitle(pgnText) {
+  const m = pgnText.match(/\[Event\s+"([^"]+)"\]/);
+  return m ? m[1] : 'Untitled';
+}
+
+function buildChapterList() {
+  const list = document.getElementById('chapter-list');
+  list.innerHTML = '';
+  allChapters.forEach((pgn, i) => {
+    const item  = document.createElement('div');
+    item.className = 'chapter-item' + (i === currentChapter ? ' active' : '');
+    item.dataset.idx = i;
+
+    const num   = document.createElement('span');
+    num.className = 'chapter-num';
+    num.textContent = i + 1;
+
+    const title = document.createElement('span');
+    title.className = 'chapter-title';
+    title.textContent = extractChapterTitle(pgn);
+
+    item.appendChild(num);
+    item.appendChild(title);
+    item.addEventListener('click', () => loadChapter(i));
+    list.appendChild(item);
+  });
+
+  document.getElementById('study-panel').style.display =
+    allChapters.length > 0 ? 'flex' : 'none';
+}
+
+function loadChapter(idx) {
+  currentChapter = idx;
+  // Update active highlight
+  document.querySelectorAll('.chapter-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  loadPgnText(allChapters[idx]);
+}
+
+function loadStudyFile(text) {
+  const chapters = parseMultiPgn(text);
+  if (chapters.length === 0) { alert('No games found in this file.'); return; }
+  allChapters    = chapters;
+  currentChapter = 0;
+  buildChapterList();
+  loadChapter(0);
 }
 
 // ─── Interactive piece movement ──────────────────────────────────────────────
@@ -1117,6 +1259,18 @@ function init() {
   document.getElementById('btn-next').addEventListener('click',  () => navigateTo(currentIdx + 1));
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
+
+  // Study file loader
+  const studyInput = document.getElementById('study-file-input');
+  document.getElementById('btn-load-study').addEventListener('click', () => studyInput.click());
+  studyInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => loadStudyFile(ev.target.result);
+    reader.readAsText(file);
+    e.target.value = ''; // allow re-selecting same file
+  });
   document.getElementById('btn-hint').addEventListener('click', () => {
     if (allFens.length === 0) return;
     if (currentBestMove) {
