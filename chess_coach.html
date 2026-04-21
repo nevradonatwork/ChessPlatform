@@ -412,6 +412,7 @@ let selectedSq       = null;  // currently selected square name e.g. 'e2'
 let legalDestSquares = [];    // legal destination squares for selected piece
 
 let hintActive       = false;  // true while hint arrow is visible
+let hintPending      = false;  // true when hint was pressed but bestmove not yet received
 
 // Drag-and-drop state
 let isDragging       = false;
@@ -729,6 +730,7 @@ function navigateTo(idx) {
   selectedSq       = null;
   legalDestSquares = [];
   hintActive       = false;
+  hintPending      = false;
   renderPosition();
   analysePosition();
 }
@@ -822,6 +824,7 @@ function makeMove(from, to) {
   selectedSq       = null;
   legalDestSquares = [];
   hintActive       = false;
+  hintPending      = false;
   buildMoveList();
   renderPosition();
   analysePosition();
@@ -989,13 +992,7 @@ function uciToSan(uci, fen) {
 async function initStockfish() {
   engineDot('loading');
   try {
-    // Fetch Stockfish source so the blob worker is fully self-contained
-    // (browsers block importScripts to external URLs from blob: workers)
-    const resp = await fetch('https://unpkg.com/stockfish@10.0/stockfish.js');
-    if (!resp.ok) throw new Error('fetch ' + resp.status);
-    const src  = await resp.text();
-    const blob = new Blob([src], { type: 'application/javascript' });
-    sfWorker = new Worker(URL.createObjectURL(blob));
+    sfWorker = new Worker('stockfish.js');
     sfWorker.onmessage = e => handleSfMessage(e.data);
     sfWorker.onerror   = () => engineDot('error');
     sfWorker.postMessage('uci');
@@ -1057,6 +1054,13 @@ function handleSfMessage(line) {
     const san = uciToSan(bm, allFens[currentIdx]);
     document.getElementById('bm-value').textContent = san;
     engineDot('complete');
+
+    // If hint was pressed while engine was still analysing, show now
+    if (hintPending) {
+      hintPending = false;
+      hintActive  = true;
+      renderPosition();
+    }
   }
 }
 
@@ -1097,13 +1101,19 @@ function init() {
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
   document.getElementById('btn-hint').addEventListener('click', () => {
-    if (!currentBestMove && allFens.length > 0) {
-      // Stockfish not available — compute with built-in engine
+    if (allFens.length === 0) return;
+    if (currentBestMove) {
+      // Stockfish already has a result — show immediately
+      hintActive = true;
+      renderPosition();
+    } else if (sfReady) {
+      // Engine is ready but still analysing — wait for bestmove
+      hintPending = true;
+    } else {
+      // Engine unavailable — fall back to built-in minimax
       const uci = builtinBestMove(allFens[currentIdx]);
-      if (uci) currentBestMove = uci;
+      if (uci) { currentBestMove = uci; hintActive = true; renderPosition(); }
     }
-    hintActive = true;
-    renderPosition();
   });
 
   // ─── Drag-and-drop ────────────────────────────────────────────────────────
