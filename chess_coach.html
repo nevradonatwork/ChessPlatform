@@ -31,6 +31,8 @@
     }
 
     .app-header {
+      max-width: 1060px;
+      margin: 0 auto;
       text-align: center;
       padding: 22px 24px 0;
       font-size: 20px;
@@ -45,6 +47,8 @@
       gap: 24px;
       padding: 24px;
       align-items: flex-start;
+      max-width: 1060px;
+      margin: 0 auto;
     }
 
     /* ---- LEFT COLUMN ---- */
@@ -52,8 +56,15 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      width: 500px;
+      width: 100%;
+      max-width: 500px;
       flex-shrink: 0;
+    }
+
+    .board-outer {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
     }
 
     .board-container {
@@ -185,11 +196,7 @@
 
     /* Move list */
     #move-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px;
-      align-items: center;
-      min-height: 28px;
+      display: none;
     }
 
     .move-number-label {
@@ -465,6 +472,21 @@
       border: 1px solid #555;
     }
 
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 900px) {
+      .right-col { min-width: 220px; }
+    }
+
+    @media (max-width: 680px) {
+      .app-header { padding: 16px 12px 0; font-size: 16px; }
+      .app-wrapper { flex-direction: column; padding: 12px; gap: 16px; }
+      .left-col  { max-width: 100%; }
+      .right-col { width: 100%; max-width: 100%; }
+      .controls-bar button { padding: 6px 10px; font-size: 14px; }
+      .chapter-item { padding: 9px 10px; }
+      .pgn-section, .fen-section { font-size: 12px; }
+    }
+
   </style>
 </head>
 <body>
@@ -476,9 +498,11 @@
   <!-- LEFT COLUMN -->
   <div class="left-col">
 
-    <div class="board-container">
-      <canvas id="board-canvas" width="500" height="500"></canvas>
-      <canvas id="arrow-canvas" width="500" height="500"></canvas>
+    <div class="board-outer">
+      <div class="board-container">
+        <canvas id="board-canvas" width="500" height="500"></canvas>
+        <canvas id="arrow-canvas" width="500" height="500"></canvas>
+      </div>
     </div>
 
     <div class="controls-bar">
@@ -1363,8 +1387,21 @@ function resetToStart() {
   currentIdx = 0;
 }
 
+function scaleBoard() {
+  const outer = document.querySelector('.board-outer');
+  if (!outer) return;
+  const available = outer.clientWidth;
+  const scale = Math.min(1, available / 500);
+  const bc = document.querySelector('.board-container');
+  bc.style.transform = scale < 1 ? `scale(${scale})` : '';
+  bc.style.transformOrigin = 'top left';
+  outer.style.height = (500 * scale) + 'px';
+}
+
 function init() {
   resetToStart();
+  scaleBoard();
+  window.addEventListener('resize', scaleBoard);
   renderPosition(); // immediate render (Unicode fallback until images load)
   loadPieceImages().then(() => renderPosition()); // re-render with SVG pieces
   initStockfish();
