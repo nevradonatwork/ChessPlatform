@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Coach</title>
+  <title>Training from Your Games</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="chess.js"></script>
   <style>
@@ -28,6 +28,16 @@
       color: var(--text);
       font-family: 'IBM Plex Sans', sans-serif;
       min-height: 100vh;
+    }
+
+    .app-header {
+      text-align: center;
+      padding: 22px 24px 0;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
     }
 
     .app-wrapper {
@@ -219,14 +229,50 @@
       border-color: var(--accent);
     }
 
-    /* FEN display */
-    #fen-display {
+    /* FEN section */
+    .fen-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .fen-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    #fen-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
       font-family: 'IBM Plex Mono', monospace;
       font-size: 10px;
-      color: var(--muted);
-      word-break: break-all;
-      line-height: 1.4;
+      padding: 6px 8px;
+      min-width: 0;
+      transition: border-color 0.15s;
     }
+
+    #fen-input:focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+
+    #btn-load-fen {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 14px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    #btn-load-fen:hover { background: var(--border); }
 
     /* PGN section */
     .pgn-section {
@@ -423,6 +469,8 @@
 </head>
 <body>
 
+<div class="app-header">Training from Your Games</div>
+
 <div class="app-wrapper">
 
   <!-- LEFT COLUMN -->
@@ -454,10 +502,16 @@
 
     <div id="move-list"></div>
 
-    <div id="fen-display"></div>
+    <div class="fen-section">
+      <span class="pgn-label">FEN</span>
+      <div class="fen-row">
+        <input type="text" id="fen-input" placeholder="Paste FEN to load position…" spellcheck="false">
+        <button id="btn-load-fen">Load</button>
+      </div>
+    </div>
 
     <div class="pgn-section">
-      <span class="pgn-label">Paste PGN</span>
+      <span class="pgn-label">PGN</span>
       <textarea id="pgn-input" placeholder="[Event &quot;Test Game&quot;]&#10;[White &quot;Player1&quot;]&#10;[Black &quot;Player2&quot;]&#10;&#10;1. e4 e5 2. Nf3 ..."></textarea>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button id="btn-load-pgn">Load Game</button>
@@ -478,7 +532,7 @@
     </div>
 
     <div class="study-panel" id="study-panel" style="display:none">
-      <div class="panel-header">Training from Your Games</div>
+      <div class="panel-header">Positions from Your Games</div>
       <div id="chapter-list"></div>
     </div>
 
@@ -789,7 +843,8 @@ function updateTurnDisplay() {
 }
 
 function updateFenDisplay() {
-  document.getElementById('fen-display').textContent = allFens[currentIdx] || '';
+  const el = document.getElementById('fen-input');
+  if (el) el.value = allFens[currentIdx] || '';
 }
 
 // ─── Move counter ─────────────────────────────────────────────────────────────
@@ -893,7 +948,15 @@ function loadPgnText(pgnText) {
 }
 
 function loadPgn() {
-  loadPgnText(document.getElementById('pgn-input').value.trim());
+  const pgn = document.getElementById('pgn-input');
+  pgn.readOnly = false;
+  loadPgnText(pgn.value.trim());
+}
+
+function loadFen() {
+  const fen = document.getElementById('fen-input').value.trim();
+  if (!fen) return;
+  loadPgnText(`[SetUp "1"]\n[FEN "${fen}"]\n\n*`);
 }
 
 // ─── Study file ───────────────────────────────────────────────────────────────
@@ -945,11 +1008,13 @@ function buildChapterList() {
 
 function loadChapter(idx) {
   currentChapter = idx;
-  // Update active highlight
   document.querySelectorAll('.chapter-item').forEach((el, i) => {
     el.classList.toggle('active', i === idx);
   });
   loadPgnText(allChapters[idx]);
+  const pgn = document.getElementById('pgn-input');
+  pgn.value    = allChapters[idx];
+  pgn.readOnly = true;
 }
 
 function loadStudyFile(text) {
@@ -1310,6 +1375,10 @@ function init() {
   document.getElementById('btn-next').addEventListener('click',  () => navigateTo(currentIdx + 1));
   document.getElementById('btn-end').addEventListener('click',   () => navigateTo(allFens.length - 1));
   document.getElementById('btn-load-pgn').addEventListener('click', loadPgn);
+  document.getElementById('btn-load-fen').addEventListener('click', loadFen);
+  document.getElementById('fen-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadFen();
+  });
 
   // Study file loader
   const studyInput = document.getElementById('study-file-input');
