@@ -443,14 +443,11 @@
     #btn-load-study:hover { background: var(--border); }
 
     #turn-display {
-      font-size: 12px;
-      font-weight: 600;
-      font-family: 'IBM Plex Mono', monospace;
-      min-height: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      min-height: 20px;
     }
-
-    #turn-display.white { color: #f0d9b5; }
-    #turn-display.black { color: var(--muted); }
 
     .chapter-turn {
       font-size: 10px;
@@ -550,9 +547,8 @@
   <div class="right-col">
 
     <div class="engine-panel">
-      <div class="panel-header">Engine Analysis</div>
       <div id="turn-display"></div>
-      <div id="best-move-display"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
+      <div id="best-move-display" style="display:none"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
     </div>
 
     <div class="study-panel" id="study-panel" style="display:none">
@@ -763,8 +759,8 @@ function renderHintArrow(fromSq, toSq) {
   const endX   = to.x   - ux * SQ * 0.25;
   const endY   = to.y   - uy * SQ * 0.25;
 
-  aCtx.strokeStyle = 'rgba(232,201,109,0.88)';
-  aCtx.fillStyle   = 'rgba(232,201,109,0.88)';
+  aCtx.strokeStyle = 'rgba(150,150,150,0.75)';
+  aCtx.fillStyle   = 'rgba(150,150,150,0.75)';
   aCtx.lineWidth   = SQ * 0.15;
   aCtx.lineCap     = 'round';
 
