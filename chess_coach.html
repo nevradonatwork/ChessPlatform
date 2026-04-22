@@ -42,29 +42,30 @@
 
     .brand {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 3px;
       flex-shrink: 0;
       background: #000;
       border-radius: 8px;
-      padding: 8px 14px 8px 10px;
+      padding: 10px 20px 8px;
+    }
+
+    .brand-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand-crown {
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1;
       color: #fff;
       font-family: serif;
     }
 
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
     .brand-name {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       color: #fff;
       letter-spacing: 0.01em;
@@ -73,10 +74,10 @@
     }
 
     .brand-tagline {
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 500;
       color: #aaa;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       font-family: 'IBM Plex Sans', sans-serif;
     }
@@ -536,9 +537,9 @@
       .chapter-item { padding: 9px 10px; }
       .pgn-section, .fen-section { font-size: 12px; }
       .app-header { padding: 12px 12px 0; gap: 10px; }
-      .brand { padding: 6px 10px 6px 8px; }
-      .brand-crown { font-size: 20px; }
-      .brand-name { font-size: 14px; }
+      .brand { padding: 7px 14px 6px; }
+      .brand-crown { font-size: 18px; }
+      .brand-name { font-size: 15px; }
       .app-title { font-size: 14px; }
     }
 
@@ -548,11 +549,11 @@
 
 <div class="app-header">
   <div class="brand">
-    <div class="brand-crown">♛</div>
-    <div class="brand-text">
+    <div class="brand-top">
+      <div class="brand-crown">♛</div>
       <span class="brand-name">MyMove</span>
-      <span class="brand-tagline">Personalized Chess Trainer</span>
     </div>
+    <span class="brand-tagline">Personalized Chess Trainer</span>
   </div>
 </div>
 
@@ -666,6 +667,8 @@ let legalDestSquares = [];    // legal destination squares for selected piece
 
 let hintActive       = false;  // true while hint arrow is visible
 let hintPending      = false;  // true when hint was pressed but bestmove not yet received
+let moveFeedback     = '';     // 'correct' | 'wrong' | ''
+let feedbackTimer    = null;
 
 // Study file state
 let allChapters    = [];   // array of PGN strings (one per game in the study file)
@@ -927,8 +930,20 @@ function renderArrow(fromSq, toSq) {
 function updateTurnDisplay() {
   const fen  = allFens[currentIdx] || '';
   const el   = document.getElementById('turn-display');
-  if (!fen) { el.textContent = ''; return; }
+  if (!fen) { el.textContent = ''; el.style.color = ''; return; }
 
+  if (moveFeedback === 'correct') {
+    el.textContent = 'You found it! ✓';
+    el.style.color = 'var(--green)';
+    return;
+  }
+  if (moveFeedback === 'wrong') {
+    el.textContent = 'Not the best move — try again';
+    el.style.color = 'var(--red)';
+    return;
+  }
+
+  el.style.color = '';
   const pos  = new Chess(fen);
   if (pos.in_checkmate()) {
     const winner = pos.turn() === 'w' ? 'Black' : 'White';
@@ -937,11 +952,7 @@ function updateTurnDisplay() {
   }
 
   const turn = fen.split(' ')[1];
-  let text   = turn === 'w' ? 'White to move' : 'Black to move';
-  if (currentBestMoveSan && currentBestMoveSan.endsWith('#')) {
-    text += ': ' + currentBestMoveSan;
-  }
-  el.textContent = text;
+  el.textContent = turn === 'w' ? 'White to move' : 'Black to move';
 }
 
 function updateFenDisplay() {
@@ -1010,6 +1021,8 @@ function navigateTo(idx) {
   legalDestSquares = [];
   hintActive       = false;
   hintPending      = false;
+  if (feedbackTimer) { clearTimeout(feedbackTimer); feedbackTimer = null; }
+  moveFeedback     = '';
   renderPosition();
   analysePosition();
 }
@@ -1181,6 +1194,8 @@ function makeMove(from, to) {
   const move      = chessInst.move({ from, to, promotion: 'q' }); // auto-queen promotion
   if (!move) return;
 
+  const bestBefore = currentBestMove;
+
   // Truncate game from current position and append the new move
   allFens  = allFens.slice(0, currentIdx + 1);
   allMoves = allMoves.slice(0, currentIdx);
@@ -1192,6 +1207,17 @@ function makeMove(from, to) {
   legalDestSquares = [];
   hintActive       = false;
   hintPending      = false;
+
+  if (bestBefore && bestBefore.length >= 4) {
+    if (feedbackTimer) clearTimeout(feedbackTimer);
+    moveFeedback = (from + to === bestBefore.slice(0, 4)) ? 'correct' : 'wrong';
+    feedbackTimer = setTimeout(() => {
+      moveFeedback = '';
+      feedbackTimer = null;
+      updateTurnDisplay();
+    }, 2500);
+  }
+
   buildMoveList();
   renderPosition();
   analysePosition();
