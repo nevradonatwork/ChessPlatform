@@ -173,12 +173,7 @@
       cursor: not-allowed;
     }
 
-    .move-counter {
-      font-size: 12px;
-      color: var(--muted);
-      margin-left: 4px;
-      font-family: 'IBM Plex Mono', monospace;
-    }
+    .move-counter { display: none; }
 
     .engine-status {
       margin-left: auto;
@@ -573,12 +568,12 @@
     </div>
 
     <div class="controls-bar">
-      <button id="btn-start" title="Start">⏮</button>
+      <button id="btn-start" title="Start">«</button>
       <button id="btn-prev"  title="Previous">◀</button>
       <button id="btn-next"  title="Next">▶</button>
-      <button id="btn-end"   title="End">⏭</button>
+      <button id="btn-end"   title="End">»</button>
       <button id="btn-hint"  title="Show best move">Hint</button>
-      <span class="move-counter" id="move-counter">0 / 0</span>
+      <span class="move-counter" id="move-counter"></span>
       <div class="engine-status">
         <span id="engine-dot" class="loading"></span>
         <span id="engine-status-label">Loading engine...</span>
@@ -592,6 +587,21 @@
     </div>
 
     <div id="move-list"></div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+
+    <div class="engine-panel">
+      <div id="turn-display"></div>
+      <div id="best-move-display" style="display:none"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
+    </div>
+
+    <div class="study-panel" id="study-panel" style="display:none">
+      <div class="panel-header">Positions from Your Games</div>
+      <div id="chapter-list"></div>
+    </div>
 
     <div class="chapter-nav" id="chapter-nav">
       <button id="btn-prev-chapter">← Prev Position</button>
@@ -614,21 +624,6 @@
         <input type="file" id="study-file-input" style="display:none">
         <button id="btn-load-study">Load Study</button>
       </div>
-    </div>
-
-  </div>
-
-  <!-- RIGHT COLUMN -->
-  <div class="right-col">
-
-    <div class="engine-panel">
-      <div id="turn-display"></div>
-      <div id="best-move-display" style="display:none"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
-    </div>
-
-    <div class="study-panel" id="study-panel" style="display:none">
-      <div class="panel-header">Positions from Your Games</div>
-      <div id="chapter-list"></div>
     </div>
 
   </div>
@@ -1423,7 +1418,7 @@ function handleSfMessage(line) {
       let n = parseInt(mateMatch[1]);
       // Positive = side-to-move mates; normalise to white's POV
       if (isBlack) n = -n;
-      const label = n > 0 ? 'M' + n : '-M' + Math.abs(n);
+      const label = n > 0 ? '#' + n : '-#' + Math.abs(n);
       updateEvalBar(n > 0 ? 99 : -99, label);
     }
   }
