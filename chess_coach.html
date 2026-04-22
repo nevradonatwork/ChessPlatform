@@ -163,12 +163,12 @@
       border: 1px solid var(--border);
     }
 
-    /* Blue (black advantage) is the right portion; gold (white advantage) fills from left */
+    /* White fills from left (light), black fills from right (dark grey) */
     .eval-bar-black {
       position: absolute;
       right: 0; top: 0; bottom: 0;
       width: 50%;
-      background: var(--accent2);
+      background: #3a3a3a;
       transition: width 0.35s ease;
     }
 
@@ -176,7 +176,7 @@
       position: absolute;
       left: 0; top: 0; bottom: 0;
       width: 50%;
-      background: var(--accent);
+      background: #e8e8e8;
       transition: width 0.35s ease;
     }
 
@@ -188,10 +188,10 @@
       font-size: 11px;
       font-weight: 600;
       font-family: 'IBM Plex Mono', monospace;
-      color: #111;
+      color: #000;
       pointer-events: none;
       white-space: nowrap;
-      text-shadow: 0 0 3px rgba(255,255,255,0.4);
+      text-shadow: 0 0 4px rgba(255,255,255,0.9), 0 0 4px rgba(255,255,255,0.9);
     }
 
     /* Move list */
@@ -413,12 +413,7 @@
     }
 
     .chapter-num {
-      color: var(--accent);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      min-width: 22px;
-      font-weight: 600;
-      flex-shrink: 0;
+      display: none;
     }
 
     .chapter-title {
@@ -459,8 +454,9 @@
     }
 
     .chapter-turn-w {
-      background: #f0d9b5;
-      color: #1a1a1a;
+      background: #0e0e0f;
+      color: #ffffff;
+      border: 1px solid #ffffff;
     }
 
     .chapter-turn-b {
@@ -854,12 +850,23 @@ function renderArrow(fromSq, toSq) {
 // ─── FEN display ─────────────────────────────────────────────────────────────
 
 function updateTurnDisplay() {
-  const fen   = allFens[currentIdx] || '';
-  const turn  = fen.split(' ')[1]; // 'w' or 'b'
-  const el    = document.getElementById('turn-display');
-  if (!fen || !turn) { el.textContent = ''; el.className = ''; return; }
-  el.textContent = turn === 'w' ? 'White to move' : 'Black to move';
-  el.className   = turn === 'w' ? 'white' : 'black';
+  const fen  = allFens[currentIdx] || '';
+  const el   = document.getElementById('turn-display');
+  if (!fen) { el.textContent = ''; return; }
+
+  const pos  = new Chess(fen);
+  if (pos.in_checkmate()) {
+    const winner = pos.turn() === 'w' ? 'Black' : 'White';
+    el.textContent = `Checkmate — ${winner} wins`;
+    return;
+  }
+
+  const turn = fen.split(' ')[1];
+  let text   = turn === 'w' ? 'White to move' : 'Black to move';
+  if (currentBestMoveSan && currentBestMoveSan.endsWith('#')) {
+    text += ': ' + currentBestMoveSan;
+  }
+  el.textContent = text;
 }
 
 function updateFenDisplay() {
@@ -1338,14 +1345,18 @@ function handleSfMessage(line) {
     const bm    = parts[1];
 
     if (!bm || bm === '(none)') {
-      document.getElementById('bm-value').textContent = 'Game over';
+      const pos2 = new Chess(allFens[currentIdx]);
+      if (pos2.in_checkmate()) {
+        const whiteWins = pos2.turn() === 'b';
+        updateEvalBar(whiteWins ? 99 : -99, whiteWins ? 'Checkmate 1-0' : 'Checkmate 0-1');
+      }
       engineDot('complete');
       return;
     }
 
     currentBestMove    = bm;
     currentBestMoveSan = uciToSan(bm, allFens[currentIdx]);
-    // Best move is intentionally NOT shown here — only revealed on Hint click
+    updateTurnDisplay(); // show "X to move: Move#" if it's a checkmate move
     engineDot('complete');
 
     // If hint was pressed while engine was still analysing, reveal now
@@ -1361,12 +1372,27 @@ function handleSfMessage(line) {
 function analysePosition() {
   if (!sfReady || allFens.length === 0) return;
 
-  engineDot('analysing');
-  currentEvalScore = null;
   currentBestMove    = '';
   currentBestMoveSan = '';
   hintActive         = false;
   document.getElementById('bm-value').textContent = '—';
+
+  const pos = new Chess(allFens[currentIdx]);
+  if (pos.in_checkmate()) {
+    const whiteWins = pos.turn() === 'b'; // black's turn means white just mated black
+    updateEvalBar(whiteWins ? 99 : -99, whiteWins ? 'Checkmate 1-0' : 'Checkmate 0-1');
+    engineDot('complete');
+    updateTurnDisplay();
+    return;
+  }
+  if (pos.in_stalemate() || pos.in_draw()) {
+    updateEvalBar(0, 'Draw');
+    engineDot('complete');
+    return;
+  }
+
+  currentEvalScore = null;
+  engineDot('analysing');
   resetEvalBar();
 
   sfWorker.postMessage('stop');
