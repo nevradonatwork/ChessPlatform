@@ -1475,86 +1475,114 @@ function init() {
 
   // ─── Drag-and-drop ────────────────────────────────────────────────────────
 
-  boardCanvas.addEventListener('mousedown', e => {
-    if (allFens.length === 0) return;
-    const rect = boardCanvas.getBoundingClientRect();
-    const x    = e.clientX - rect.left;
-    const y    = e.clientY - rect.top;
-    const col  = Math.floor(x / SQ);
-    const row  = Math.floor(y / SQ);
-    if (col < 0 || col > 7 || row < 0 || row > 7) return;
-    const sq         = FILES[col] + (8 - row);
-    const chessInst  = new Chess(allFens[currentIdx]);
-    const piece      = chessInst.get(sq);
-    if (piece && piece.color === chessInst.turn()) {
-      _dragStartSq    = sq;
-      _dragStartPiece = piece;
-      _dragStartX     = x;
-      _dragStartY     = y;
-    }
-  });
+  // Convert screen coords → canvas coords (accounts for CSS scale on mobile)
+  function getBoardCoords(clientX, clientY) {
+    const rect  = boardCanvas.getBoundingClientRect();
+    const scale = rect.width / 500;
+    return { x: (clientX - rect.left) / scale, y: (clientY - rect.top) / scale };
+  }
 
-  document.addEventListener('mousemove', e => {
+  function startDragFrom(x, y) {
+    if (allFens.length === 0) return;
+    const col = Math.floor(x / SQ), row = Math.floor(y / SQ);
+    if (col < 0 || col > 7 || row < 0 || row > 7) return;
+    const sq        = FILES[col] + (8 - row);
+    const chessInst = new Chess(allFens[currentIdx]);
+    const piece     = chessInst.get(sq);
+    if (piece && piece.color === chessInst.turn()) {
+      _dragStartSq = sq; _dragStartPiece = piece;
+      _dragStartX  = x; _dragStartY = y;
+    }
+  }
+
+  function moveDragTo(x, y) {
     if (!_dragStartSq) return;
-    const rect = boardCanvas.getBoundingClientRect();
-    const x    = e.clientX - rect.left;
-    const y    = e.clientY - rect.top;
     if (!isDragging) {
       const dx = x - _dragStartX, dy = y - _dragStartY;
-      if (dx * dx + dy * dy < 25) return; // threshold 5px
-      isDragging        = true;
-      dragSq            = _dragStartSq;
-      dragPiece         = _dragStartPiece;
-      selectedSq        = dragSq;
-      legalDestSquares  = new Chess(allFens[currentIdx])
-                            .moves({ square: dragSq, verbose: true })
-                            .map(m => m.to);
+      if (dx * dx + dy * dy < 25) return;
+      isDragging       = true;
+      dragSq           = _dragStartSq;
+      dragPiece        = _dragStartPiece;
+      selectedSq       = dragSq;
+      legalDestSquares = new Chess(allFens[currentIdx])
+                           .moves({ square: dragSq, verbose: true })
+                           .map(m => m.to);
       boardCanvas.style.cursor = 'grabbing';
     }
-    dragX = x;
-    dragY = y;
+    dragX = x; dragY = y;
     renderPosition();
-  });
+  }
 
-  document.addEventListener('mouseup', e => {
+  function endDrag(x, y) {
     if (!isDragging) {
       _dragStartSq = null; _dragStartPiece = null;
-      return;
+      return false; // was a tap, not a drag
     }
-    const rect   = boardCanvas.getBoundingClientRect();
-    const x      = e.clientX - rect.left;
-    const y      = e.clientY - rect.top;
-    const col    = Math.floor(x / SQ);
-    const row    = Math.floor(y / SQ);
+    const col    = Math.floor(x / SQ), row = Math.floor(y / SQ);
     const dropSq = (col >= 0 && col <= 7 && row >= 0 && row <= 7)
                     ? FILES[col] + (8 - row) : null;
-
-    isDragging   = false;
-    dragPiece    = null;
-    const fromSq = dragSq;
-    dragSq       = null;
+    isDragging = false; dragPiece = null;
+    const fromSq = dragSq; dragSq = null;
     _dragStartSq = null; _dragStartPiece = null;
     boardCanvas.style.cursor = 'pointer';
-    _suppressClick = true;
-
     if (dropSq && legalDestSquares.includes(dropSq)) {
       makeMove(fromSq, dropSq);
     } else {
-      selectedSq       = null;
-      legalDestSquares = [];
+      selectedSq = null; legalDestSquares = [];
       renderPosition();
+    }
+    return true; // was a drag
+  }
+
+  // ─── Mouse events ─────────────────────────────────────────────────────────
+  boardCanvas.addEventListener('mousedown', e => {
+    const {x, y} = getBoardCoords(e.clientX, e.clientY);
+    startDragFrom(x, y);
+  });
+  document.addEventListener('mousemove', e => {
+    const {x, y} = getBoardCoords(e.clientX, e.clientY);
+    moveDragTo(x, y);
+  });
+  document.addEventListener('mouseup', e => {
+    const {x, y} = getBoardCoords(e.clientX, e.clientY);
+    const wasDrag = endDrag(x, y);
+    if (wasDrag) _suppressClick = true;
+  });
+
+  // ─── Touch events (mobile) ────────────────────────────────────────────────
+  boardCanvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const {x, y} = getBoardCoords(t.clientX, t.clientY);
+    startDragFrom(x, y);
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!_dragStartSq) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const {x, y} = getBoardCoords(t.clientX, t.clientY);
+    moveDragTo(x, y);
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    const t = e.changedTouches[0];
+    const {x, y} = getBoardCoords(t.clientX, t.clientY);
+    const wasDrag = endDrag(x, y);
+    if (!wasDrag) {
+      // It was a tap — treat as click-to-move
+      const col = Math.floor(x / SQ), row = Math.floor(y / SQ);
+      if (col >= 0 && col <= 7 && row >= 0 && row <= 7) {
+        handleSquareClick(FILES[col] + (8 - row));
+      }
     }
   });
 
-  // ─── Click (piece selection / click-to-move) ──────────────────────────────
-
+  // ─── Click (desktop click-to-move) ────────────────────────────────────────
   boardCanvas.addEventListener('click', e => {
     if (_suppressClick) { _suppressClick = false; return; }
-    const rect = boardCanvas.getBoundingClientRect();
-    const x    = e.clientX - rect.left;
-    const y    = e.clientY - rect.top;
-    const col  = Math.floor(x / SQ);
-    const row  = Math.floor(y / SQ);
+    const {x, y} = getBoardCoords(e.clientX, e.clientY);
+    const col = Math.floor(x / SQ), row = Math.floor(y / SQ);
     if (col < 0 || col > 7 || row < 0 || row > 7) return;
     handleSquareClick(FILES[col] + (8 - row));
   });
