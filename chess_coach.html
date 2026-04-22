@@ -389,6 +389,36 @@
 
     #btn-load-study:hover { background: var(--border); }
 
+    #turn-display {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 16px;
+    }
+
+    #turn-display.white { color: #f0d9b5; }
+    #turn-display.black { color: var(--muted); }
+
+    .chapter-turn {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      letter-spacing: 0.03em;
+    }
+
+    .chapter-turn-w {
+      background: #f0d9b5;
+      color: #1a1a1a;
+    }
+
+    .chapter-turn-b {
+      background: #2a2a2e;
+      color: #c8c8c8;
+      border: 1px solid #555;
+    }
+
   </style>
 </head>
 <body>
@@ -443,11 +473,12 @@
 
     <div class="engine-panel">
       <div class="panel-header">Engine Analysis</div>
+      <div id="turn-display"></div>
       <div id="best-move-display"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
     </div>
 
     <div class="study-panel" id="study-panel" style="display:none">
-      <div class="panel-header">Study Chapters</div>
+      <div class="panel-header">Training from Your Games</div>
       <div id="chapter-list"></div>
     </div>
 
@@ -483,7 +514,8 @@ let currentIdx       = 0;
 let sfWorker         = null;
 let sfReady          = false;
 let currentEvalScore = null;  // number (pawns, white-relative) or null
-let currentBestMove  = '';    // UCI string
+let currentBestMove    = '';  // UCI string
+let currentBestMoveSan = '';  // SAN string — revealed only when hint is pressed
 let selectedSq       = null;  // currently selected square name e.g. 'e2'
 let legalDestSquares = [];    // legal destination squares for selected piece
 
@@ -747,6 +779,15 @@ function renderArrow(fromSq, toSq) {
 
 // ─── FEN display ─────────────────────────────────────────────────────────────
 
+function updateTurnDisplay() {
+  const fen   = allFens[currentIdx] || '';
+  const turn  = fen.split(' ')[1]; // 'w' or 'b'
+  const el    = document.getElementById('turn-display');
+  if (!fen || !turn) { el.textContent = ''; el.className = ''; return; }
+  el.textContent = turn === 'w' ? 'White to move' : 'Black to move';
+  el.className   = turn === 'w' ? 'white' : 'black';
+}
+
 function updateFenDisplay() {
   document.getElementById('fen-display').textContent = allFens[currentIdx] || '';
 }
@@ -771,6 +812,7 @@ function renderPosition() {
   updateFenDisplay();
   updateMoveCounter();
   updateMoveListHighlight();
+  updateTurnDisplay();
 }
 
 // ─── Move list ────────────────────────────────────────────────────────────────
@@ -876,6 +918,12 @@ function buildChapterList() {
     item.className = 'chapter-item' + (i === currentChapter ? ' active' : '');
     item.dataset.idx = i;
 
+    const fenMatch = pgn.match(/\[FEN\s+"([^"]+)"\]/);
+    const turnChar = fenMatch ? fenMatch[1].split(' ')[1] : 'w';
+    const badge = document.createElement('span');
+    badge.className = `chapter-turn chapter-turn-${turnChar}`;
+    badge.textContent = turnChar === 'w' ? 'W' : 'B';
+
     const num   = document.createElement('span');
     num.className = 'chapter-num';
     num.textContent = i + 1;
@@ -884,6 +932,7 @@ function buildChapterList() {
     title.className = 'chapter-title';
     title.textContent = extractChapterTitle(pgn);
 
+    item.appendChild(badge);
     item.appendChild(num);
     item.appendChild(title);
     item.addEventListener('click', () => loadChapter(i));
@@ -1209,15 +1258,16 @@ function handleSfMessage(line) {
       return;
     }
 
-    currentBestMove = bm;
-    const san = uciToSan(bm, allFens[currentIdx]);
-    document.getElementById('bm-value').textContent = san;
+    currentBestMove    = bm;
+    currentBestMoveSan = uciToSan(bm, allFens[currentIdx]);
+    // Best move is intentionally NOT shown here — only revealed on Hint click
     engineDot('complete');
 
-    // If hint was pressed while engine was still analysing, show now
+    // If hint was pressed while engine was still analysing, reveal now
     if (hintPending) {
       hintPending = false;
       hintActive  = true;
+      document.getElementById('bm-value').textContent = currentBestMoveSan;
       renderPosition();
     }
   }
@@ -1228,8 +1278,9 @@ function analysePosition() {
 
   engineDot('analysing');
   currentEvalScore = null;
-  currentBestMove  = '';
-  hintActive       = false;
+  currentBestMove    = '';
+  currentBestMoveSan = '';
+  hintActive         = false;
   document.getElementById('bm-value').textContent = '—';
   resetEvalBar();
 
@@ -1274,16 +1325,23 @@ function init() {
   document.getElementById('btn-hint').addEventListener('click', () => {
     if (allFens.length === 0) return;
     if (currentBestMove) {
-      // Stockfish already has a result — show immediately
+      // Stockfish already has a result — reveal SAN and show arrow
       hintActive = true;
+      document.getElementById('bm-value').textContent = currentBestMoveSan || currentBestMove;
       renderPosition();
     } else if (sfReady) {
-      // Engine is ready but still analysing — wait for bestmove
+      // Engine is ready but still analysing — wait for bestmove then reveal
       hintPending = true;
     } else {
       // Engine unavailable — fall back to built-in minimax
       const uci = builtinBestMove(allFens[currentIdx]);
-      if (uci) { currentBestMove = uci; hintActive = true; renderPosition(); }
+      if (uci) {
+        currentBestMove    = uci;
+        currentBestMoveSan = uciToSan(uci, allFens[currentIdx]);
+        hintActive = true;
+        document.getElementById('bm-value').textContent = currentBestMoveSan;
+        renderPosition();
+      }
     }
   });
 
