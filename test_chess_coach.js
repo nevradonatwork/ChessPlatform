@@ -108,7 +108,7 @@ async function runTests() {
       await page.waitForTimeout(1000);
 
       // Check FEN display shows the expected FEN
-      const fenText = await page.$eval('#fen-display', el => el.textContent.trim()).catch(() => '');
+      const fenText = await page.$eval('#fen-input', el => el.value.trim()).catch(() => '');
       console.log(`  FEN display: "${fenText.substring(0, 80)}..."`);
 
       const expectedFenStart = '8/6p1/7p/4P3/1kP5/p2K2PP/8/8';
@@ -281,7 +281,7 @@ async function testStudyLoader(page) {
   await items[1].click();
   await page.waitForTimeout(400);
 
-  const fen = await page.$eval('#fen-display', el => el.textContent);
+  const fen = await page.$eval('#fen-input', el => el.value);
   chk('Ch2 loads endgame FEN', fen.includes('1kP5'), fen.slice(0, 35));
 
   const a2 = await page.$eval('.chapter-item.active .chapter-num', el => el.textContent).catch(() => 'NONE');
