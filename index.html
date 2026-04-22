@@ -152,6 +152,7 @@
     .controls-bar {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
     }
 
@@ -178,10 +179,17 @@
     .move-counter { display: none; }
 
     .engine-status {
-      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .turn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     #engine-dot {
@@ -576,10 +584,6 @@
       <button id="btn-end"   title="End">»</button>
       <button id="btn-hint"  title="Show best move">Hint</button>
       <span class="move-counter" id="move-counter"></span>
-      <div class="engine-status">
-        <span id="engine-dot" class="loading"></span>
-        <span id="engine-status-label">Loading engine...</span>
-      </div>
     </div>
 
     <div class="eval-bar-container">
@@ -596,7 +600,13 @@
   <div class="right-col">
 
     <div class="engine-panel">
-      <div id="turn-display"></div>
+      <div class="turn-row">
+        <div id="turn-display"></div>
+        <div class="engine-status">
+          <span id="engine-dot" class="loading"></span>
+          <span id="engine-status-label">Loading engine...</span>
+        </div>
+      </div>
       <div id="best-move-display" style="display:none"><span class="bm-label">Best move: </span><span class="bm-value" id="bm-value">—</span></div>
     </div>
 
