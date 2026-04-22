@@ -33,8 +33,56 @@
     .app-header {
       max-width: 1060px;
       margin: 0 auto;
+      padding: 18px 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #000;
+      border-radius: 8px;
+      padding: 8px 14px 8px 10px;
+    }
+
+    .brand-crown {
+      font-size: 28px;
+      line-height: 1;
+      color: #fff;
+      font-family: serif;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.01em;
+      font-family: 'IBM Plex Sans', sans-serif;
+      line-height: 1.1;
+    }
+
+    .brand-tagline {
+      font-size: 8px;
+      font-weight: 500;
+      color: #aaa;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .app-title {
+      flex: 1;
       text-align: center;
-      padding: 22px 24px 0;
       font-size: 20px;
       font-weight: 600;
       letter-spacing: 0.08em;
@@ -478,13 +526,27 @@
       .controls-bar button { padding: 6px 10px; font-size: 14px; }
       .chapter-item { padding: 9px 10px; }
       .pgn-section, .fen-section { font-size: 12px; }
+      .app-header { padding: 12px 12px 0; gap: 10px; }
+      .brand { padding: 6px 10px 6px 8px; }
+      .brand-crown { font-size: 20px; }
+      .brand-name { font-size: 14px; }
+      .app-title { font-size: 14px; }
     }
 
   </style>
 </head>
 <body>
 
-<div class="app-header">Training from Your Games</div>
+<div class="app-header">
+  <div class="brand">
+    <div class="brand-crown">♛</div>
+    <div class="brand-text">
+      <span class="brand-name">MyMove</span>
+      <span class="brand-tagline">Personalized Chess Trainer</span>
+    </div>
+  </div>
+  <div class="app-title">Training from Your Games</div>
+</div>
 
 <div class="app-wrapper">
 
