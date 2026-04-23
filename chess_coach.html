@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Training from Your Games</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="chess.js"></script>
@@ -140,6 +140,8 @@
     #board-canvas {
       display: block;
       cursor: pointer;
+      touch-action: none;          /* Android: let JS own all touch gestures, no browser scroll/zoom */
+      -webkit-touch-callout: none; /* iOS/Android: suppress long-press context menu during drag */
     }
 
     #arrow-canvas {
@@ -549,6 +551,8 @@
       .brand-crown { font-size: 18px; }
       .brand-name { font-size: 15px; }
       .app-title { font-size: 14px; }
+      #fen-input { font-size: 16px; } /* prevent Android/iOS auto-zoom on focus */
+      #pgn-input { font-size: 16px; } /* prevent Android/iOS auto-zoom on focus */
     }
 
   </style>
@@ -1699,6 +1703,7 @@ function init() {
       // It was a tap — treat as click-to-move
       const col = Math.floor(x / SQ), row = Math.floor(y / SQ);
       if (col >= 0 && col <= 7 && row >= 0 && row <= 7) {
+        _suppressClick = true; // Android Chrome fires a click after touchend; suppress it
         handleSquareClick(FILES[col] + (8 - row));
       }
     }
